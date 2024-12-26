@@ -1,0 +1,17 @@
+@{
+    ViewData["Title"] = "New match";  
+}
+
+<h1>New match</h1>
+
+<form action="/new-match" method="post">
+    <label for="firstPlayerName">Player #1 name</label>
+    <input type="text" id="firstPlayerName" name="firstPlayerName" required />
+    <br /> <br />
+
+    <label for="secondPlayerName">Player #2 name</label>
+    <input type="text" id="secondPlayerName" name="secondPlayerName" required />
+    <br /> <br />
+
+    <button type="submit">Start new match</button>
+</form>
