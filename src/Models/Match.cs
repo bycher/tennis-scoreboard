@@ -1,8 +1,11 @@
 namespace TennisScoreboard.Models;
 
 public class Match {
-    public int ID { get; set; }
-    public int FirstPlayerID { get; set; }
-    public int SecondPlayerID { get; set; }
-    public int WinnerID { get; set; }
+    public int Id { get; set; }
+    public int FirstPlayerId { get; set; }
+    public int SecondPlayerId { get; set; }
+    public int WinnerId { get; set; }
+
+    public Player FirstPlayer { get; set; } = null!;
+    public Player SecondPlayer { get; set; } = null!;
 }
