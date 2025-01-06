@@ -25,7 +25,7 @@ public class NewMatchController(TennisMatchesContext context, OngoingMatchesStor
             )
         );
 
-        return RedirectToAction("MatchScore", "MatchScoreController", new { uuid = key });
+        return RedirectToRoute("match-score", new { uuid = key });
     }
 
     private async Task AddPlayer(string name) {

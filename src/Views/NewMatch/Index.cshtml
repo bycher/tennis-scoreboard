@@ -4,7 +4,7 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<form action="/new-match" method="post">
+<form asp-controller="NewMatch" asp-action="NewMatch" method="post">
     <label for="firstPlayerName">Player #1 name</label>
     <input type="text" id="firstPlayerName" name="firstPlayerName" required />
     <br /> <br />

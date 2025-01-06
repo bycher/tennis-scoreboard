@@ -1,0 +1,41 @@
+@model OngoingMatchViewModel
+
+<table>    
+    <thead>
+        <tr>
+            <th>Player</th>
+            <th>Game</th>
+            @for (int i = 1; i <= Model.FirstPlayerSets.Count; i++) {
+                <th>Set @i</th>
+            }
+            <th>Set @(Model.FirstPlayerSets.Count + 1)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Model.FirstPlayerName</td>
+            <td>@Model.FirstPlayerPoints</td>
+            @foreach (var gamesInSet in Model.FirstPlayerSets) {
+                <td>@gamesInSet</td>
+            }
+            <td>@Model.FirstPlayerGames</td>
+        </tr>
+        <tr>
+            <td>@Model.SecondPlayerName</td>
+            <td>@Model.SecondPlayerPoints</td>
+            @foreach (var gamesInSet in Model.SecondPlayerSets) {
+                <td>@gamesInSet</td>
+            }
+            <td>@Model.SecondPlayerGames</td>
+    </tbody>
+</table>
+
+<div>
+    <form method="post" asp-controller="MatchScore" asp-action="UpdateMatchScore" asp-route-uuid="@ViewContext.HttpContext.Request.Query["uuid"]">
+        <button type="submit" name="winnerId" value=@Model.FirstPlayerId>Player 1 wins a point</button>
+    </form>
+
+    <form method="post" asp-controller="MatchScore" asp-action="UpdateMatchScore" asp-route-uuid="@ViewContext.HttpContext.Request.Query["uuid"]">
+        <button type="submit" name="winnerId" value=@Model.SecondPlayerId>Player 2 wins a point</button>
+    </form>
+</div>
