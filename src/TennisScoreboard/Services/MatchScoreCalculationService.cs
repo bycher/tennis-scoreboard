@@ -9,10 +9,9 @@ public class MatchScoreCalculationService {
         
         if (match.IsGameFinished()) {
             match.PlayersMatchStates[winnerId].GamesInCurrentSet++;
+            if (match.IsSetFinished() && !match.IsMatchFinished())
+                match.StartNewSet();
             match.StartNewGame();
         }
-        
-        if (match.IsSetFinished() && !match.IsMatchFinished())
-            match.StartNewSet();
     }
 }

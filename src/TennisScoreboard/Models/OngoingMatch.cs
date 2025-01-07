@@ -1,13 +1,12 @@
 namespace TennisScoreboard.Models;
 
 public class OngoingMatch(int firstPlayerId, int secondPlayerId) {
-    private const int MinPointsToWin = 4;
-    private const int MinPointsDifferenceToWin = 2;
+    public const int MinPointsToWin = 4;
+    public const int MinPointsDifferenceToWin = 2;
+    public const int MinTieBreakPointsToWin = 7;
 
-    private const int MinTieBreakPointsToWin = 7;
-
-    private const int MinGamesToWin = 6;
-    private const int MinGamesDifferenceToWin = 2;
+    public const int MinGamesToWin = 6;
+    public const int MinGamesDifferenceToWin = 2;
 
     public int FirstPlayerId { get; set; } = firstPlayerId;
     public int SecondPlayerId { get; set; } = secondPlayerId;
@@ -23,8 +22,10 @@ public class OngoingMatch(int firstPlayerId, int secondPlayerId) {
     }
 
     public void StartNewSet() {
-        foreach (var playerMatchState in PlayersMatchStates.Values)
+        foreach (var playerMatchState in PlayersMatchStates.Values) {
             playerMatchState.FinishedGames.Add(playerMatchState.GamesInCurrentSet);
+            playerMatchState.GamesInCurrentSet = 0;
+        }
     }
     
     private MatchState GetOpponentMatchState(int playerId) {
@@ -51,7 +52,7 @@ public class OngoingMatch(int firstPlayerId, int secondPlayerId) {
     }
 
     public bool IsTieBreak() {
-        return PlayersMatchStates.All(x => x.Value.GamesInCurrentSet == MinGamesToWin);
+        return PlayersMatchStates.All(x => x.Value.GamesInCurrentSet >= MinGamesToWin);
     }
 
     public bool IsTieBreakFinished() {
