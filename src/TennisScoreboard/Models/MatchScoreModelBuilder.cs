@@ -4,7 +4,7 @@ public class MatchScoreModelBuilder(int firstPlayerId, int secondPlayerId)
 {
     private readonly MatchScoreModel _matchScoreModel = new(firstPlayerId, secondPlayerId);
 
-    public MatchScoreModelBuilder WithPointsInCurrentGame(string pointsString) {
+    public MatchScoreModelBuilder WithPoints(string pointsString) {
         var points = pointsString.Split(':').Select(p => p switch {
             "0" => 0,
             "15" => 1,
@@ -14,8 +14,8 @@ public class MatchScoreModelBuilder(int firstPlayerId, int secondPlayerId)
             _ => throw new ArgumentException("Invalid points string")
         }).ToList();
 
-        _matchScoreModel.FirstPlayerScores.PointsInCurrentGame = points[0];
-        _matchScoreModel.SecondPlayerScores.PointsInCurrentGame = points[1];
+        _matchScoreModel.FirstPlayerScores.Points = points[0];
+        _matchScoreModel.SecondPlayerScores.Points = points[1];
 
         return this;
     }
@@ -23,27 +23,27 @@ public class MatchScoreModelBuilder(int firstPlayerId, int secondPlayerId)
     public MatchScoreModelBuilder WithTieBreak(string tieBreakPointsString) {
         var points = tieBreakPointsString.Split(':').Select(int.Parse).ToList();
 
-        _matchScoreModel.FirstPlayerScores.PointsInCurrentGame = points[0];
-        _matchScoreModel.SecondPlayerScores.PointsInCurrentGame = points[1];
+        _matchScoreModel.FirstPlayerScores.Points = points[0];
+        _matchScoreModel.SecondPlayerScores.Points = points[1];
 
-        return WithGamesInCurrentSet("6:6");
+        return WithGames("6:6");
     }
 
-    public MatchScoreModelBuilder WithGamesInCurrentSet(string gamesString) {
+    public MatchScoreModelBuilder WithGames(string gamesString) {
         var games = gamesString.Split(':').Select(int.Parse).ToList();
 
-        _matchScoreModel.FirstPlayerScores.GamesInCurrentSet = games[0];
-        _matchScoreModel.SecondPlayerScores.GamesInCurrentSet = games[1];
+        _matchScoreModel.FirstPlayerScores.Games = games[0];
+        _matchScoreModel.SecondPlayerScores.Games = games[1];
 
         return this;
     }
 
-    public MatchScoreModelBuilder WithFinishedSets(List<Tuple<int, int>> finishedSets) {
-        var firstPlayerFinishedSets = finishedSets.Select(set => set.Item1).ToList();
-        var secondPlayerFinishedSets = finishedSets.Select(set => set.Item2).ToList();
+    public MatchScoreModelBuilder WithSets(List<Tuple<int, int>> Sets) {
+        var firstPlayerSets = Sets.Select(set => set.Item1).ToList();
+        var secondPlayerSets = Sets.Select(set => set.Item2).ToList();
         
-        _matchScoreModel.FirstPlayerScores.FinishedSets = firstPlayerFinishedSets;
-        _matchScoreModel.SecondPlayerScores.FinishedSets = secondPlayerFinishedSets;
+        _matchScoreModel.FirstPlayerScores.Sets = firstPlayerSets;
+        _matchScoreModel.SecondPlayerScores.Sets = secondPlayerSets;
 
         return this;
     }

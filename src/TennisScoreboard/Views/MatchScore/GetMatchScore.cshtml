@@ -1,7 +1,7 @@
 @model MatchScoreModel
 
 @{
-    var numFinishedSets = Model.FirstPlayerScores.FinishedSets.Count;
+    var numSets = Model.FirstPlayerScores.Sets.Count;
 }
 
 <table>    
@@ -11,11 +11,11 @@
             @if (!@Model.IsMatchFinished) {
                 <th>Game</th>
             }
-            @for (int i = 1; i <= numFinishedSets; i++) {
+            @for (int i = 1; i <= numSets; i++) {
                 <th>Set @i</th>
             }
             @if (!@Model.IsMatchFinished) {
-                <th>Set @(numFinishedSets + 1)</th>
+                <th>Set @(numSets + 1)</th>
             }
         </tr>
     </thead>
@@ -23,25 +23,25 @@
         <tr>
             <td>@Model.Match.FirstPlayer.Name</td>
             @if (!@Model.IsMatchFinished) {
-                <td>@Model.FirstPlayerScores.PointsInCurrentGame</td>
+                <td>@Model.FirstPlayerScores.PointsAsString</td>
             }
-            @foreach (var finishedSet in Model.FirstPlayerScores.FinishedSets) {
+            @foreach (var finishedSet in Model.FirstPlayerScores.Sets) {
                 <td>@finishedSet</td>
             }
             @if (!@Model.IsMatchFinished) {
-                <td>@Model.FirstPlayerScores.GamesInCurrentSet</td>
+                <td>@Model.FirstPlayerScores.Games</td>
             }
         </tr>
         <tr>
             <td>@Model.Match.SecondPlayer.Name</td>
             @if (!@Model.IsMatchFinished) {
-                <td>@Model.SecondPlayerScores.PointsInCurrentGame</td>
+                <td>@Model.SecondPlayerScores.PointsAsString</td>
             }
-            @foreach (var finishedSet in Model.SecondPlayerScores.FinishedSets) {
+            @foreach (var finishedSet in Model.SecondPlayerScores.Sets) {
                 <td>@finishedSet</td>
             }
             @if (!@Model.IsMatchFinished) {
-                <td>@Model.SecondPlayerScores.GamesInCurrentSet</td>
+                <td>@Model.SecondPlayerScores.Games</td>
             }
         </tr>
     </tbody>

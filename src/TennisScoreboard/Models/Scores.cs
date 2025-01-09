@@ -1,16 +1,25 @@
 namespace TennisScoreboard.Models;
 
 public class Scores {
-    public int PointsInCurrentGame { get; set; }
-    public int GamesInCurrentSet { get; set; }
-    public List<int> FinishedSets { get; set; } = [];
+    public int Points { get; set; }
+    public int Games { get; set; }
+    public List<int> Sets { get; set; } = [];
 
     public void ResetPoints() {
-        PointsInCurrentGame = 0;
+        Points = 0;
     }
 
     public void ResetGames() {
-        FinishedSets.Add(GamesInCurrentSet);
-        GamesInCurrentSet = 0;
+        Sets.Add(Games);
+        Games = 0;
     }
+
+    public string PointsAsString => Points switch {
+        0 => "0",
+        1 => "15",
+        2 => "30",
+        3 => "40",
+        4 => "AD",
+        _ => throw new ArgumentException("Invalid points string")
+    };
 }

@@ -20,104 +20,104 @@ public class MatchScoreCalculationServiceTests {
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsPoint_ShouldIncrementPointsInCurrentGame() {
+    public void UpdateMatchScore_WhenPlayerWinsPoint_ShouldIncrementPoints() {
         // Arrange
-        var match = _builder.WithPointsInCurrentGame("0:0").Build();
+        var match = _builder.WithPoints("0:0").Build();
         
         // Act
         _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.FirstPlayerScores.PointsInCurrentGame, Is.EqualTo(1));
+        Assert.That(match.FirstPlayerScores.Points, Is.EqualTo(1));
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerLosePoint_ShouldNotIncrementPointsInCurrentGame() {
+    public void UpdateMatchScore_WhenPlayerLosePoint_ShouldNotIncrementPoints() {
         // Arrange
-        var match = _builder.WithPointsInCurrentGame("0:0").Build();
+        var match = _builder.WithPoints("0:0").Build();
         
         // Act
         _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.SecondPlayerScores.PointsInCurrentGame, Is.EqualTo(0));
+        Assert.That(match.SecondPlayerScores.Points, Is.EqualTo(0));
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsGameStandard_ShouldIncrementGamesInCurrentSet() {
+    public void UpdateMatchScore_WhenPlayerWinsGameStandard_ShouldIncrementGames() {
         // Arrange
-        var match = _builder.WithPointsInCurrentGame("40:0").Build();
+        var match = _builder.WithPoints("40:0").Build();
         
         // Act
         _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(1));
+        Assert.That(match.FirstPlayerScores.Games, Is.EqualTo(1));
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsGame_ShouldResetPointsInCurrentGame() {
+    public void UpdateMatchScore_WhenPlayerWinsGame_ShouldResetPoints() {
         // Arrange
-        var match = _builder.WithPointsInCurrentGame("40:0").Build();
+        var match = _builder.WithPoints("40:0").Build();
         
         // Act
         _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.FirstPlayerScores.PointsInCurrentGame, Is.EqualTo(0));
+        Assert.That(match.FirstPlayerScores.Points, Is.EqualTo(0));
     }
 
     [Test]
     public void UpdateMatchScore_WhenDeuceIsAchieved_GameShouldBeContinued() {
         // Arrange
-        var match = _builder.WithPointsInCurrentGame("40:40").Build();
+        var match = _builder.WithPoints("40:40").Build();
         
         // Act
         _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
-            Assert.That(match.SecondPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+            Assert.That(match.FirstPlayerScores.Games, Is.EqualTo(0));
+            Assert.That(match.SecondPlayerScores.Games, Is.EqualTo(0));
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsFromAdvantage_ShouldIncrementGamesInCurrentSet() {
+    public void UpdateMatchScore_WhenPlayerWinsFromAdvantage_ShouldIncrementGames() {
         // Arrange
-        var match = _builder.WithPointsInCurrentGame("AD:40").Build();
+        var match = _builder.WithPoints("AD:40").Build();
         
         // Act
         _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(1));
-            Assert.That(match.SecondPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+            Assert.That(match.FirstPlayerScores.Games, Is.EqualTo(1));
+            Assert.That(match.SecondPlayerScores.Games, Is.EqualTo(0));
         });
     }
 
     [Test]
     public void UpdateMatchScore_WhenLoserRecoupsAdvantage_GameShouldBeContinued() {
         // Arrange
-        var match = _builder.WithPointsInCurrentGame("AD:40").Build();
+        var match = _builder.WithPoints("AD:40").Build();
         
         // Act
         _service.UpdateMatchScore(match, _secondPlayerId);
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
-            Assert.That(match.SecondPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+            Assert.That(match.FirstPlayerScores.Games, Is.EqualTo(0));
+            Assert.That(match.SecondPlayerScores.Games, Is.EqualTo(0));
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsSixGamesWithAtLeastTwoGamesLead_ShouldUpdateFinishedSets() {
+    public void UpdateMatchScore_WhenPlayerWinsSixGamesWithAtLeastTwoGamesLead_ShouldUpdateSets() {
         // Arrange
         var match = _builder
-            .WithGamesInCurrentSet("5:4")
-            .WithPointsInCurrentGame("40:0")
+            .WithGames("5:4")
+            .WithPoints("40:0")
             .Build();
         
         // Act
@@ -126,22 +126,22 @@ public class MatchScoreCalculationServiceTests {
         // Assert
         Assert.Multiple(() => {
             Assert.That(
-                match.FirstPlayerScores.FinishedSets,
+                match.FirstPlayerScores.Sets,
                 Is.EqualTo(new List<int> { 6 })
             );
             Assert.That(
-                match.SecondPlayerScores.FinishedSets,
+                match.SecondPlayerScores.Sets,
                 Is.EqualTo(new List<int> { 4 })
             );
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsSevenGamesWithoutTieBreak_ShouldUpdateFinishedSets() {
+    public void UpdateMatchScore_WhenPlayerWinsSevenGamesWithoutTieBreak_ShouldUpdateSets() {
         // Arrange
         var match = _builder
-            .WithGamesInCurrentSet("6:5")
-            .WithPointsInCurrentGame("40:0")
+            .WithGames("6:5")
+            .WithPoints("40:0")
             .Build();
         
         // Act
@@ -150,11 +150,11 @@ public class MatchScoreCalculationServiceTests {
         // Assert
         Assert.Multiple(() => {
             Assert.That(
-                match.FirstPlayerScores.FinishedSets,
+                match.FirstPlayerScores.Sets,
                 Is.EqualTo(new List<int> { 7 })
             );
             Assert.That(
-                match.SecondPlayerScores.FinishedSets,
+                match.SecondPlayerScores.Sets,
                 Is.EqualTo(new List<int> { 5 })
             );
         });
@@ -164,8 +164,8 @@ public class MatchScoreCalculationServiceTests {
     public void UpdateMatchScore_WhenBothPlayersReachMinGamesToWin_CurrentSetShouldBeContinuedWithTieBreak() {
         // Arrange
         var match = _builder
-            .WithGamesInCurrentSet("6:5")
-            .WithPointsInCurrentGame("0:40")
+            .WithGames("6:5")
+            .WithPoints("0:40")
             .Build();
 
         // Precondition
@@ -176,14 +176,14 @@ public class MatchScoreCalculationServiceTests {
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.FinishedSets, Is.Empty);
-            Assert.That(match.SecondPlayerScores.FinishedSets, Is.Empty);
+            Assert.That(match.FirstPlayerScores.Sets, Is.Empty);
+            Assert.That(match.SecondPlayerScores.Sets, Is.Empty);
             Assert.That(match.IsTieBreak, Is.True);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenTieBreak_And_PlayerGetsSevenPointsWithTwoPointsLead_ShouldUpdateFinishedSets() {
+    public void UpdateMatchScore_WhenTieBreak_And_PlayerGetsSevenPointsWithTwoPointsLead_ShouldUpdateSets() {
         // Arrange
         var match = _builder.WithTieBreak("6:5").Build();
         
@@ -193,11 +193,11 @@ public class MatchScoreCalculationServiceTests {
         // Assert
         Assert.Multiple(() => {
             Assert.That(
-                match.FirstPlayerScores.FinishedSets,
+                match.FirstPlayerScores.Sets,
                 Is.EqualTo(new List<int> { 7 })
             );
             Assert.That(
-                match.SecondPlayerScores.FinishedSets,
+                match.SecondPlayerScores.Sets,
                 Is.EqualTo(new List<int> { 6 })
             );
         });
@@ -213,8 +213,8 @@ public class MatchScoreCalculationServiceTests {
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.FinishedSets, Is.Empty);
-            Assert.That(match.SecondPlayerScores.FinishedSets, Is.Empty);
+            Assert.That(match.FirstPlayerScores.Sets, Is.Empty);
+            Assert.That(match.SecondPlayerScores.Sets, Is.Empty);
             Assert.That(match.IsSetFinished, Is.False);
         });
     }
@@ -223,9 +223,9 @@ public class MatchScoreCalculationServiceTests {
     public void UpdateMatchScore_WhenPlayerWinsTwoOutOfTwoSets_MatchShouldBeEnded() {
         // Arrange
         var match = _builder
-            .WithFinishedSets([new(6, 4)])
-            .WithGamesInCurrentSet("5:4")
-            .WithPointsInCurrentGame("40:0")
+            .WithSets([new(6, 4)])
+            .WithGames("5:4")
+            .WithPoints("40:0")
             .Build();
 
         // Act
@@ -233,8 +233,8 @@ public class MatchScoreCalculationServiceTests {
 
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 6, 6 }));
-            Assert.That(match.SecondPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 4, 4 }));
+            Assert.That(match.FirstPlayerScores.Sets, Is.EqualTo(new List<int> { 6, 6 }));
+            Assert.That(match.SecondPlayerScores.Sets, Is.EqualTo(new List<int> { 4, 4 }));
             Assert.That(match.IsMatchFinished, Is.True);
         });
     }
@@ -243,9 +243,9 @@ public class MatchScoreCalculationServiceTests {
     public void UpdateMatchScore_WhenPlayerWinsTwoOutOfThreeSets_MatchShouldBeEnded() {
         // Arrange
         var match = _builder
-            .WithFinishedSets([new(6, 4), new(4, 6)])
-            .WithGamesInCurrentSet("5:4")
-            .WithPointsInCurrentGame("40:0")
+            .WithSets([new(6, 4), new(4, 6)])
+            .WithGames("5:4")
+            .WithPoints("40:0")
             .Build();
 
         // Act
@@ -253,8 +253,8 @@ public class MatchScoreCalculationServiceTests {
 
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 6, 4, 6 }));
-            Assert.That(match.SecondPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 4, 6, 4 }));
+            Assert.That(match.FirstPlayerScores.Sets, Is.EqualTo(new List<int> { 6, 4, 6 }));
+            Assert.That(match.SecondPlayerScores.Sets, Is.EqualTo(new List<int> { 4, 6, 4 }));
             Assert.That(match.IsMatchFinished, Is.True);
         });
     }
@@ -263,9 +263,9 @@ public class MatchScoreCalculationServiceTests {
     public void UpdateMatchScore_WhenBothPlayersWinSet_MatchShouldBeContinued() {
         // Arrange
         var match = _builder
-            .WithFinishedSets([new(6, 4)])
-            .WithGamesInCurrentSet("4:5")
-            .WithPointsInCurrentGame("0:40")
+            .WithSets([new(6, 4)])
+            .WithGames("4:5")
+            .WithPoints("0:40")
             .Build();
 
         // Act
@@ -273,8 +273,8 @@ public class MatchScoreCalculationServiceTests {
 
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.FirstPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 6, 4 }));
-            Assert.That(match.SecondPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 4, 6 }));
+            Assert.That(match.FirstPlayerScores.Sets, Is.EqualTo(new List<int> { 6, 4 }));
+            Assert.That(match.SecondPlayerScores.Sets, Is.EqualTo(new List<int> { 4, 6 }));
             Assert.That(match.IsMatchFinished, Is.False);
         });
     }

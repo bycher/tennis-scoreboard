@@ -4,19 +4,37 @@ namespace TennisScoreboard.Services;
 
 public class MatchScoreCalculationService {
     public void UpdateMatchScore(MatchScoreModel matchScoreModel, int winnerId) {
-        if (winnerId == matchScoreModel.Match.FirstPlayerId)
-            matchScoreModel.FirstPlayerScores.PointsInCurrentGame++;
-        else
-            matchScoreModel.SecondPlayerScores.PointsInCurrentGame++;
+        UpdatePoints(matchScoreModel, winnerId);
         
         if (matchScoreModel.IsGameFinished) {
-            if (winnerId == matchScoreModel.Match.FirstPlayerId)
-                matchScoreModel.FirstPlayerScores.GamesInCurrentSet++;
-            else
-                matchScoreModel.SecondPlayerScores.GamesInCurrentSet++;
+            UpdateGames(matchScoreModel, winnerId);
+
             if (matchScoreModel.IsSetFinished && !matchScoreModel.IsMatchFinished)
                 matchScoreModel.StartNewSet();
-            matchScoreModel.StartNewGame();
+            else if (!matchScoreModel.IsMatchFinished)
+                matchScoreModel.StartNewGame();
+        }
+    }
+
+    private static void UpdateGames(MatchScoreModel matchScoreModel, int winnerId) {
+        if (winnerId == matchScoreModel.Match.FirstPlayerId)
+            matchScoreModel.FirstPlayerScores.Games++;
+        else
+            matchScoreModel.SecondPlayerScores.Games++;
+    }
+
+    private static void UpdatePoints(MatchScoreModel matchScoreModel, int winnerId) {
+        if (winnerId == matchScoreModel.Match.FirstPlayerId) {
+            if (matchScoreModel.IsAdvantage)
+                matchScoreModel.SecondPlayerScores.Points--;
+            else
+                matchScoreModel.FirstPlayerScores.Points++;
+        }
+        else {
+            if (matchScoreModel.IsAdvantage)
+                matchScoreModel.FirstPlayerScores.Points--;
+            else
+                matchScoreModel.SecondPlayerScores.Points++;
         }
     }
 }

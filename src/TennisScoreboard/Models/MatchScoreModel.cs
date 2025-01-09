@@ -12,38 +12,39 @@ public class MatchScoreModel(Match match) {
     public Scores FirstPlayerScores { get; set; } = new Scores();
     public Scores SecondPlayerScores { get; set; } = new Scores();
 
+    public bool IsAdvantage => (FirstPlayerScores.Points == MinPointsToWin ||
+                            SecondPlayerScores.Points == MinPointsToWin) &&
+                            PointsDifference == MinPointsDifferenceToWin - 1;
+
     public bool IsGameFinished => IsTieBreak ? IsTieBreakFinished : IsRegularGameFinished;
 
-    public bool IsTieBreak => FirstPlayerScores.GamesInCurrentSet >= MinGamesToWin &&
-                            SecondPlayerScores.GamesInCurrentSet >= MinGamesToWin;
+    public bool IsTieBreak => FirstPlayerScores.Games >= MinGamesToWin &&
+                            SecondPlayerScores.Games >= MinGamesToWin;
 
     public bool IsSetFinished => IsTieBreak ? IsTieBreakFinished
-                                            : (FirstPlayerScores.GamesInCurrentSet >= MinGamesToWin ||
-                                            SecondPlayerScores.GamesInCurrentSet >= MinGamesToWin) &&
+                                            : (FirstPlayerScores.Games >= MinGamesToWin ||
+                                            SecondPlayerScores.Games >= MinGamesToWin) &&
                                             GamesDifference >= MinGamesDifferenceToWin;
 
     public bool IsMatchFinished {
         get {
-            var firstWinSetsCount = Enumerable.Zip(FirstPlayerScores.FinishedSets, SecondPlayerScores.FinishedSets)
-                                              .Count(x => x.First > x.Second);
-            var secondWinSetsCount = SecondPlayerScores.FinishedSets.Count - firstWinSetsCount;
+            var firstWinSetsCount = Enumerable.Zip(FirstPlayerScores.Sets, SecondPlayerScores.Sets)
+                                            .Count(x => x.First > x.Second);
+            var secondWinSetsCount = SecondPlayerScores.Sets.Count - firstWinSetsCount;
             return firstWinSetsCount == MinSetsToWin || secondWinSetsCount == MinSetsToWin;
         }
     }
 
-    private bool IsTieBreakFinished => (FirstPlayerScores.PointsInCurrentGame >= MinTieBreakPointsToWin ||
-                                    SecondPlayerScores.PointsInCurrentGame >= MinTieBreakPointsToWin) &&
+    private bool IsTieBreakFinished => (FirstPlayerScores.Points >= MinTieBreakPointsToWin ||
+                                    SecondPlayerScores.Points >= MinTieBreakPointsToWin) &&
                                     PointsDifference >= MinPointsDifferenceToWin;
     
-    private bool IsRegularGameFinished => (FirstPlayerScores.PointsInCurrentGame >= MinPointsToWin ||
-                                        SecondPlayerScores.PointsInCurrentGame >= MinPointsToWin) &&
+    private bool IsRegularGameFinished => (FirstPlayerScores.Points >= MinPointsToWin ||
+                                        SecondPlayerScores.Points >= MinPointsToWin) &&
                                         PointsDifference >= MinPointsDifferenceToWin;
 
-    private int PointsDifference =>
-        Math.Abs(FirstPlayerScores.PointsInCurrentGame - SecondPlayerScores.PointsInCurrentGame);
-
-    private int GamesDifference =>
-        Math.Abs(FirstPlayerScores.GamesInCurrentSet - SecondPlayerScores.GamesInCurrentSet);
+    private int PointsDifference => Math.Abs(FirstPlayerScores.Points - SecondPlayerScores.Points);
+    private int GamesDifference => Math.Abs(FirstPlayerScores.Games - SecondPlayerScores.Games);
 
     public MatchScoreModel(int firstPlayerId, int secondPlayerId) : this(new Match {
         FirstPlayerId = firstPlayerId,
