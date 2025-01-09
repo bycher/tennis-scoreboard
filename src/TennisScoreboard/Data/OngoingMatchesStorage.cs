@@ -1,19 +1,21 @@
 using TennisScoreboard.Models;
 
-namespace TennisScoreboard.Data
-{
-    public class OngoingMatchesStorage
-    {
-        private readonly Dictionary<Guid, OngoingMatch> _storage = [];
+namespace TennisScoreboard.Data;
 
-        public OngoingMatch? Get(Guid key) {
-            return _storage.GetValueOrDefault(key);
-        }
+public class OngoingMatchesStorage {
+    private readonly Dictionary<Guid, MatchScoreModel> _storage = [];
 
-        public Guid Add(OngoingMatch match) {
-            var key = Guid.NewGuid();
-            _storage.Add(key, match);
-            return key;
-        }
+    public MatchScoreModel? Get(Guid key) {
+        return _storage.GetValueOrDefault(key);
+    }
+
+    public Guid Add(MatchScoreModel match) {
+        var key = Guid.NewGuid();
+        _storage.Add(key, match);
+        return key;
+    }
+
+    public bool Remove(Guid key) {
+        return _storage.Remove(key);
     }
 }

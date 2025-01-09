@@ -6,9 +6,9 @@ using TennisScoreboard.Services;
 namespace TennisScoreboard.Controllers;
 
 public class MatchScoreController(
-    TennisMatchesContext context,
     OngoingMatchesStorage ongoingMatchesStorage,
-    MatchScoreCalculationService matchScoreCalculationService
+    MatchScoreCalculationService matchScoreCalculationService, 
+    FinishedMatchesArchiveService finishedMatchesArchiveService
 ) : Controller {
     [HttpGet]
     [Route("match-score")]
@@ -17,20 +17,7 @@ public class MatchScoreController(
         if (match == null)
             return NotFound(new { message = $"Match witch guid {uuid} was not found"});
 
-        var matchViewModel = new OngoingMatchViewModel {
-            FirstPlayerName = context.Players.Single(p => p.Id == match.FirstPlayerId).Name,
-            SecondPlayerName = context.Players.Single(p => p.Id == match.SecondPlayerId).Name,
-            FirstPlayerPoints = match.PlayersMatchStates[match.FirstPlayerId].PointsInCurrentGame,
-            SecondPlayerPoints = match.PlayersMatchStates[match.SecondPlayerId].PointsInCurrentGame,
-            FirstPlayerGames = match.PlayersMatchStates[match.FirstPlayerId].GamesInCurrentSet,
-            SecondPlayerGames = match.PlayersMatchStates[match.SecondPlayerId].GamesInCurrentSet,
-            FirstPlayerSets = match.PlayersMatchStates[match.FirstPlayerId].FinishedGames,
-            SecondPlayerSets = match.PlayersMatchStates[match.SecondPlayerId].FinishedGames,
-            FirstPlayerId = match.FirstPlayerId,
-            SecondPlayerId = match.SecondPlayerId
-        };
-
-        return View(matchViewModel);
+        return View(match);
     }
 
     [HttpPost]
@@ -38,23 +25,17 @@ public class MatchScoreController(
     public IActionResult UpdateMatchScore([FromQuery] Guid uuid, [FromForm] int winnerId) {
         var match = ongoingMatchesStorage.Get(uuid);
         if (match == null)
-            return NotFound(new { message = $"Match witch guid {uuid} was not found"});
+            return NotFound(new { message = $"Match '{uuid}' was not found"});
 
-        matchScoreCalculationService.UpdateMatchScore(match, winnerId);
+        if (!match.IsMatchFinished)
+            matchScoreCalculationService.UpdateMatchScore(match, winnerId);
+        else {
+            match.Match.WinnerId = winnerId;
+            finishedMatchesArchiveService.ArchiveMatch(match);
+            if (!ongoingMatchesStorage.Remove(uuid))
+                return StatusCode(500, new { message = $"Failed to remove match '{uuid}' from storage" });
+        }
 
-        var matchViewModel = new OngoingMatchViewModel {
-            FirstPlayerName = context.Players.Single(p => p.Id == match.FirstPlayerId).Name,
-            SecondPlayerName = context.Players.Single(p => p.Id == match.SecondPlayerId).Name,
-            FirstPlayerPoints = match.PlayersMatchStates[match.FirstPlayerId].PointsInCurrentGame,
-            SecondPlayerPoints = match.PlayersMatchStates[match.SecondPlayerId].PointsInCurrentGame,
-            FirstPlayerGames = match.PlayersMatchStates[match.FirstPlayerId].GamesInCurrentSet,
-            SecondPlayerGames = match.PlayersMatchStates[match.SecondPlayerId].GamesInCurrentSet,
-            FirstPlayerSets = match.PlayersMatchStates[match.FirstPlayerId].FinishedGames,
-            SecondPlayerSets = match.PlayersMatchStates[match.SecondPlayerId].FinishedGames,
-            FirstPlayerId = match.FirstPlayerId,
-            SecondPlayerId = match.SecondPlayerId
-        };
-
-        return View("GetMatchScore", matchViewModel);
+        return View("GetMatchScore", match);
     }
 }

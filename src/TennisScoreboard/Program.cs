@@ -13,6 +13,7 @@ builder.Services.AddDbContext<TennisMatchesContext>(options =>
 
 builder.Services.AddSingleton<OngoingMatchesStorage>();
 builder.Services.AddScoped<MatchScoreCalculationService>();
+builder.Services.AddScoped<FinishedMatchesArchiveService>();
 
 builder.Services.AddControllersWithViews();
 

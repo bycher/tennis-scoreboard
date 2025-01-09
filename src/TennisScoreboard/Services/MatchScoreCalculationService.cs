@@ -3,15 +3,20 @@ using TennisScoreboard.Models;
 namespace TennisScoreboard.Services;
 
 public class MatchScoreCalculationService {
-    public void UpdateMatchScore(OngoingMatch match, int winnerId) {
-        var winnerMatchState = match.PlayersMatchStates[winnerId];
-        winnerMatchState.PointsInCurrentGame++;
+    public void UpdateMatchScore(MatchScoreModel matchScoreModel, int winnerId) {
+        if (winnerId == matchScoreModel.Match.FirstPlayerId)
+            matchScoreModel.FirstPlayerScores.PointsInCurrentGame++;
+        else
+            matchScoreModel.SecondPlayerScores.PointsInCurrentGame++;
         
-        if (match.IsGameFinished()) {
-            match.PlayersMatchStates[winnerId].GamesInCurrentSet++;
-            if (match.IsSetFinished() && !match.IsMatchFinished())
-                match.StartNewSet();
-            match.StartNewGame();
+        if (matchScoreModel.IsGameFinished) {
+            if (winnerId == matchScoreModel.Match.FirstPlayerId)
+                matchScoreModel.FirstPlayerScores.GamesInCurrentSet++;
+            else
+                matchScoreModel.SecondPlayerScores.GamesInCurrentSet++;
+            if (matchScoreModel.IsSetFinished && !matchScoreModel.IsMatchFinished)
+                matchScoreModel.StartNewSet();
+            matchScoreModel.StartNewGame();
         }
     }
 }

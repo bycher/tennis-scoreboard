@@ -5,7 +5,8 @@ using TennisScoreboard.Models;
 
 namespace TennisScoreboard.Controllers;
 
-public class NewMatchController(TennisMatchesContext context, OngoingMatchesStorage ongoingMatchesStorage) : Controller {
+public class NewMatchController(
+    TennisMatchesContext context, OngoingMatchesStorage ongoingMatchesStorage) : Controller {
     public IActionResult Index() {
         return View();
     }
@@ -18,12 +19,17 @@ public class NewMatchController(TennisMatchesContext context, OngoingMatchesStor
         await AddPlayer(firstPlayerName);
         await AddPlayer(secondPlayerName);
 
+        var firstPlayer = context.Players.Single(p => p.Name == firstPlayerName);
+        var secondPlayer = context.Players.Single(p => p.Name == secondPlayerName);
+
         var key = ongoingMatchesStorage.Add(
-            new OngoingMatch(
-                firstPlayerId: context.Players.Single(p => p.Name == firstPlayerName).Id,
-                secondPlayerId: context.Players.Single(p => p.Name == secondPlayerName).Id
-            )
-        );
+            new MatchScoreModel(new Match {
+                FirstPlayerId = firstPlayer.Id,
+                SecondPlayerId = secondPlayer.Id,
+                FirstPlayer = firstPlayer,
+                SecondPlayer = secondPlayer
+            }
+        ));
 
         return RedirectToRoute("match-score", new { uuid = key });
     }

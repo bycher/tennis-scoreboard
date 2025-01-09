@@ -5,343 +5,277 @@ namespace TennisScoreboard.Tests.Services;
 
 [TestFixture]
 public class MatchScoreCalculationServiceTests {
+    private int _firstPlayerId;
+    private int _secondPlayerId;
+
+    private MatchScoreCalculationService _service = null!;
+    private MatchScoreModelBuilder _builder = null!;
+
+    [SetUp]
+    public void SetUp() {
+        _firstPlayerId = 1;
+        _secondPlayerId = 2;
+        _service = new MatchScoreCalculationService();
+        _builder = new MatchScoreModelBuilder(_firstPlayerId, _secondPlayerId);
+    }
+
     [Test]
     public void UpdateMatchScore_WhenPlayerWinsPoint_ShouldIncrementPointsInCurrentGame() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatch(firstPlayerId, secondPlayerId);
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithPointsInCurrentGame("0:0").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.PlayersMatchStates[firstPlayerId].PointsInCurrentGame, Is.EqualTo(1));
+        Assert.That(match.FirstPlayerScores.PointsInCurrentGame, Is.EqualTo(1));
     }
 
     [Test]
     public void UpdateMatchScore_WhenPlayerLosePoint_ShouldNotIncrementPointsInCurrentGame() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatch(firstPlayerId, secondPlayerId);
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithPointsInCurrentGame("0:0").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.PlayersMatchStates[secondPlayerId].PointsInCurrentGame, Is.EqualTo(0));
+        Assert.That(match.SecondPlayerScores.PointsInCurrentGame, Is.EqualTo(0));
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsStandard_ShouldIncrementGamesInCurrentSet() {
+    public void UpdateMatchScore_WhenPlayerWinsGameStandard_ShouldIncrementGamesInCurrentSet() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatch(firstPlayerId, secondPlayerId);
-        match.PlayersMatchStates[firstPlayerId].PointsInCurrentGame = OngoingMatch.MinPointsToWin - 1;
-        match.PlayersMatchStates[secondPlayerId].PointsInCurrentGame = 0;
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithPointsInCurrentGame("40:0").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.PlayersMatchStates[firstPlayerId].GamesInCurrentSet, Is.EqualTo(1));
+        Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(1));
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsStandard_ShouldResetPointsInCurrentGame() {
+    public void UpdateMatchScore_WhenPlayerWinsGame_ShouldResetPointsInCurrentGame() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatch(firstPlayerId, secondPlayerId);
-        match.PlayersMatchStates[firstPlayerId].PointsInCurrentGame = OngoingMatch.MinPointsToWin - 1;
-        match.PlayersMatchStates[secondPlayerId].PointsInCurrentGame = 0;
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithPointsInCurrentGame("40:0").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.PlayersMatchStates[firstPlayerId].PointsInCurrentGame, Is.EqualTo(0));
+        Assert.That(match.FirstPlayerScores.PointsInCurrentGame, Is.EqualTo(0));
     }
 
     [Test]
     public void UpdateMatchScore_WhenDeuceIsAchieved_GameShouldBeContinued() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatch(firstPlayerId, secondPlayerId);
-        match.PlayersMatchStates[firstPlayerId].PointsInCurrentGame = OngoingMatch.MinPointsToWin - 1;
-        match.PlayersMatchStates[secondPlayerId].PointsInCurrentGame = OngoingMatch.MinPointsToWin - 1;
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithPointsInCurrentGame("40:40").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.PlayersMatchStates[firstPlayerId].GamesInCurrentSet, Is.EqualTo(0));
+        Assert.Multiple(() => {
+            Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+            Assert.That(match.SecondPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+        });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsWithAdvantage_GameShouldBeFinished() {
+    public void UpdateMatchScore_WhenPlayerWinsFromAdvantage_ShouldIncrementGamesInCurrentSet() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatch(firstPlayerId, secondPlayerId);
-        var pointsAfterDeuce = OngoingMatch.MinPointsToWin + new Random().Next(1, 10);
-        match.PlayersMatchStates[firstPlayerId].PointsInCurrentGame = pointsAfterDeuce;
-        match.PlayersMatchStates[secondPlayerId].PointsInCurrentGame = pointsAfterDeuce - 1;
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithPointsInCurrentGame("AD:40").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
-        Assert.That(match.PlayersMatchStates[firstPlayerId].GamesInCurrentSet, Is.EqualTo(1));
+        Assert.Multiple(() => {
+            Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(1));
+            Assert.That(match.SecondPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+        });
     }
 
     [Test]
     public void UpdateMatchScore_WhenLoserRecoupsAdvantage_GameShouldBeContinued() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatch(firstPlayerId, secondPlayerId);
-        var pointsAfterDeuce = OngoingMatch.MinPointsToWin + new Random().Next(1, 10);
-        match.PlayersMatchStates[firstPlayerId].PointsInCurrentGame = pointsAfterDeuce;
-        match.PlayersMatchStates[secondPlayerId].PointsInCurrentGame = pointsAfterDeuce - 1;
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithPointsInCurrentGame("AD:40").Build();
         
         // Act
-        service.UpdateMatchScore(match, secondPlayerId);
-        
-        // Assert
-        Assert.That(match.PlayersMatchStates[secondPlayerId].GamesInCurrentSet, Is.EqualTo(0));
-    }
-
-    [Test]
-    public void UpdateMatchScore_WhenPlayerHitsMinGamesToWinWithMinDifference_SetShouldBeFinished() {
-        // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithPointsInCurrentGame(firstPlayerId, OngoingMatch.MinPointsToWin - 1)
-            .WithPointsInCurrentGame(
-                secondPlayerId, OngoingMatch.MinPointsToWin - OngoingMatch.MinPointsDifferenceToWin)
-            .WithGamesInCurrentSet(firstPlayerId, OngoingMatch.MinGamesToWin - 1)
-            .WithGamesInCurrentSet(
-                secondPlayerId, OngoingMatch.MinGamesToWin - OngoingMatch.MinGamesDifferenceToWin)
-            .Build();
-        var service = new MatchScoreCalculationService();
-        
-        // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _secondPlayerId);
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.PlayersMatchStates[firstPlayerId].GamesInCurrentSet, Is.Zero);
-            Assert.That(match.PlayersMatchStates[secondPlayerId].GamesInCurrentSet, Is.Zero);
+            Assert.That(match.FirstPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+            Assert.That(match.SecondPlayerScores.GamesInCurrentSet, Is.EqualTo(0));
+        });
+    }
+
+    [Test]
+    public void UpdateMatchScore_WhenPlayerWinsSixGamesWithAtLeastTwoGamesLead_ShouldUpdateFinishedSets() {
+        // Arrange
+        var match = _builder
+            .WithGamesInCurrentSet("5:4")
+            .WithPointsInCurrentGame("40:0")
+            .Build();
+        
+        // Act
+        _service.UpdateMatchScore(match, _firstPlayerId);
+        
+        // Assert
+        Assert.Multiple(() => {
             Assert.That(
-                match.PlayersMatchStates[firstPlayerId].FinishedGames,
-                Is.EqualTo(new List<int> { OngoingMatch.MinGamesToWin })
+                match.FirstPlayerScores.FinishedSets,
+                Is.EqualTo(new List<int> { 6 })
             );
             Assert.That(
-                match.PlayersMatchStates[secondPlayerId].FinishedGames,
-                Is.EqualTo(new List<int> { OngoingMatch.MinGamesToWin - OngoingMatch.MinGamesDifferenceToWin })
+                match.SecondPlayerScores.FinishedSets,
+                Is.EqualTo(new List<int> { 4 })
             );
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsTwoGamesAfterGamesDeuce_SetShouldBeFinished() {
+    public void UpdateMatchScore_WhenPlayerWinsSevenGamesWithoutTieBreak_ShouldUpdateFinishedSets() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithPointsInCurrentGame(firstPlayerId, OngoingMatch.MinPointsToWin - 1)
-            .WithPointsInCurrentGame(
-                secondPlayerId, OngoingMatch.MinPointsToWin - OngoingMatch.MinPointsDifferenceToWin)
-            .WithGamesInCurrentSet(firstPlayerId, OngoingMatch.MinGamesToWin)
-            .WithGamesInCurrentSet(secondPlayerId, OngoingMatch.MinGamesToWin - 1)
+        var match = _builder
+            .WithGamesInCurrentSet("6:5")
+            .WithPointsInCurrentGame("40:0")
             .Build();
-        var service = new MatchScoreCalculationService();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
         Assert.Multiple(() => {
             Assert.That(
-                match.PlayersMatchStates[firstPlayerId].FinishedGames,
-                Is.EqualTo(new List<int> { OngoingMatch.MinGamesToWin + 1 }));
+                match.FirstPlayerScores.FinishedSets,
+                Is.EqualTo(new List<int> { 7 })
+            );
             Assert.That(
-                match.PlayersMatchStates[secondPlayerId].FinishedGames,
-                Is.EqualTo(new List<int> { OngoingMatch.MinGamesToWin - 1 }));
+                match.SecondPlayerScores.FinishedSets,
+                Is.EqualTo(new List<int> { 5 })
+            );
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenBothPlayersReachMinGamesToWin_TieBreakShouldStart() {
+    public void UpdateMatchScore_WhenBothPlayersReachMinGamesToWin_CurrentSetShouldBeContinuedWithTieBreak() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithPointsInCurrentGame(firstPlayerId, OngoingMatch.MinPointsToWin - OngoingMatch.MinPointsDifferenceToWin)
-            .WithPointsInCurrentGame(secondPlayerId, OngoingMatch.MinPointsToWin - 1)
-            .WithGamesInCurrentSet(firstPlayerId, OngoingMatch.MinGamesToWin)
-            .WithGamesInCurrentSet(secondPlayerId, OngoingMatch.MinGamesToWin - 1)
+        var match = _builder
+            .WithGamesInCurrentSet("6:5")
+            .WithPointsInCurrentGame("0:40")
             .Build();
-        var service = new MatchScoreCalculationService();
 
         // Precondition
-        Assert.That(match.IsTieBreak(), Is.False);
+        Assert.That(match.IsTieBreak, Is.False);
         
         // Act
-        service.UpdateMatchScore(match, secondPlayerId);
+        _service.UpdateMatchScore(match, _secondPlayerId);
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.PlayersMatchStates[firstPlayerId].FinishedGames, Is.Empty);
-            Assert.That(match.PlayersMatchStates[secondPlayerId].FinishedGames, Is.Empty);
-            Assert.That(match.IsTieBreak(), Is.True);
+            Assert.That(match.FirstPlayerScores.FinishedSets, Is.Empty);
+            Assert.That(match.SecondPlayerScores.FinishedSets, Is.Empty);
+            Assert.That(match.IsTieBreak, Is.True);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_PlayerGetsMinTieBreakPointsToWinWithMinDifference_PlayerShouldWinSet() {
+    public void UpdateMatchScore_WhenTieBreak_And_PlayerGetsSevenPointsWithTwoPointsLead_ShouldUpdateFinishedSets() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithPointsInCurrentGame(firstPlayerId, OngoingMatch.MinTieBreakPointsToWin - 1)
-            .WithPointsInCurrentGame(secondPlayerId, OngoingMatch.MinTieBreakPointsToWin - OngoingMatch.MinPointsDifferenceToWin)
-            .WithGamesInCurrentSet(firstPlayerId, OngoingMatch.MinGamesToWin)
-            .WithGamesInCurrentSet(secondPlayerId, OngoingMatch.MinGamesToWin)
-            .Build();
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithTieBreak("6:5").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
         Assert.Multiple(() => {
             Assert.That(
-                match.PlayersMatchStates[firstPlayerId].FinishedGames,
-                Is.EqualTo(new List<int> { OngoingMatch.MinGamesToWin + 1 }));
+                match.FirstPlayerScores.FinishedSets,
+                Is.EqualTo(new List<int> { 7 })
+            );
             Assert.That(
-                match.PlayersMatchStates[secondPlayerId].FinishedGames,
-                Is.EqualTo(new List<int> { OngoingMatch.MinGamesToWin }));
+                match.SecondPlayerScores.FinishedSets,
+                Is.EqualTo(new List<int> { 6 })
+            );
         });
     }
 
     [Test]
-    public void UpdateMatchScore_PlayerGetsMinTieBreakPointsWithoutMinDifference_SetShouldNotBeFinished() {
+    public void UpdateMatchScore_WhenTieBreak_And_PlayerGetsSevenPointsWithLessThanTwoPointLead_TieBreakShouldBeContinued() {
         // Arrange
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithPointsInCurrentGame(firstPlayerId, OngoingMatch.MinTieBreakPointsToWin - 1)
-            .WithPointsInCurrentGame(
-                secondPlayerId, OngoingMatch.MinTieBreakPointsToWin - OngoingMatch.MinPointsDifferenceToWin + 1)
-            .WithGamesInCurrentSet(firstPlayerId, OngoingMatch.MinGamesToWin)
-            .WithGamesInCurrentSet(secondPlayerId, OngoingMatch.MinGamesToWin)
-            .Build();
-        var service = new MatchScoreCalculationService();
+        var match = _builder.WithTieBreak("6:6").Build();
         
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
         
         // Assert
         Assert.Multiple(() => {
-            Assert.That(
-                match.PlayersMatchStates[firstPlayerId].GamesInCurrentSet,
-                Is.EqualTo(OngoingMatch.MinGamesToWin));
-            Assert.That(
-                match.PlayersMatchStates[secondPlayerId].GamesInCurrentSet,
-                Is.EqualTo(OngoingMatch.MinGamesToWin));
-            Assert.That(match.PlayersMatchStates[firstPlayerId].FinishedGames, Is.Empty);
-            Assert.That(match.PlayersMatchStates[secondPlayerId].FinishedGames, Is.Empty);
+            Assert.That(match.FirstPlayerScores.FinishedSets, Is.Empty);
+            Assert.That(match.SecondPlayerScores.FinishedSets, Is.Empty);
+            Assert.That(match.IsSetFinished, Is.False);
         });
     }
 
     [Test]
     public void UpdateMatchScore_WhenPlayerWinsTwoOutOfTwoSets_MatchShouldBeEnded() {
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithFinishedGames(firstPlayerId, [6])
-            .WithFinishedGames(secondPlayerId, [4])
-            .WithGamesInCurrentSet(firstPlayerId, 5)
-            .WithGamesInCurrentSet(secondPlayerId, 4)
-            .WithPointsInCurrentGame(firstPlayerId, 3)
-            .WithPointsInCurrentGame(secondPlayerId, 2)
+        // Arrange
+        var match = _builder
+            .WithFinishedSets([new(6, 4)])
+            .WithGamesInCurrentSet("5:4")
+            .WithPointsInCurrentGame("40:0")
             .Build();
-        
-        var service = new MatchScoreCalculationService();
 
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
 
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.PlayersMatchStates[firstPlayerId].FinishedGames, Is.EqualTo(new List<int> { 6, 6 }));
-            Assert.That(match.PlayersMatchStates[secondPlayerId].FinishedGames, Is.EqualTo(new List<int> { 4, 4 }));
-            Assert.That(match.IsMatchFinished(), Is.True);
+            Assert.That(match.FirstPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 6, 6 }));
+            Assert.That(match.SecondPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 4, 4 }));
+            Assert.That(match.IsMatchFinished, Is.True);
         });
     }
 
     [Test]
     public void UpdateMatchScore_WhenPlayerWinsTwoOutOfThreeSets_MatchShouldBeEnded() {
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithFinishedGames(firstPlayerId, [6, 4])
-            .WithFinishedGames(secondPlayerId, [4, 6])
-            .WithGamesInCurrentSet(firstPlayerId, 5)
-            .WithGamesInCurrentSet(secondPlayerId, 4)
-            .WithPointsInCurrentGame(firstPlayerId, 3)
-            .WithPointsInCurrentGame(secondPlayerId, 2)
+        // Arrange
+        var match = _builder
+            .WithFinishedSets([new(6, 4), new(4, 6)])
+            .WithGamesInCurrentSet("5:4")
+            .WithPointsInCurrentGame("40:0")
             .Build();
-        
-        var service = new MatchScoreCalculationService();
 
         // Act
-        service.UpdateMatchScore(match, firstPlayerId);
+        _service.UpdateMatchScore(match, _firstPlayerId);
 
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.PlayersMatchStates[firstPlayerId].FinishedGames, Is.EqualTo(new List<int> { 6, 4, 6 }));
-            Assert.That(match.PlayersMatchStates[secondPlayerId].FinishedGames, Is.EqualTo(new List<int> { 4, 6, 4 }));
-            Assert.That(match.IsMatchFinished(), Is.True);
+            Assert.That(match.FirstPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 6, 4, 6 }));
+            Assert.That(match.SecondPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 4, 6, 4 }));
+            Assert.That(match.IsMatchFinished, Is.True);
         });
     }
 
     [Test]
     public void UpdateMatchScore_WhenBothPlayersWinSet_MatchShouldBeContinued() {
-        var firstPlayerId = 1;
-        var secondPlayerId = 2;
-        var match = new OngoingMatchBuilder(firstPlayerId, secondPlayerId)
-            .WithFinishedGames(firstPlayerId, [6])
-            .WithFinishedGames(secondPlayerId, [4])
-            .WithGamesInCurrentSet(firstPlayerId, 4)
-            .WithGamesInCurrentSet(secondPlayerId, 5)
-            .WithPointsInCurrentGame(firstPlayerId, 2)
-            .WithPointsInCurrentGame(secondPlayerId, 3)
+        // Arrange
+        var match = _builder
+            .WithFinishedSets([new(6, 4)])
+            .WithGamesInCurrentSet("4:5")
+            .WithPointsInCurrentGame("0:40")
             .Build();
-        
-        var service = new MatchScoreCalculationService();
 
         // Act
-        service.UpdateMatchScore(match, secondPlayerId);
+        _service.UpdateMatchScore(match, _secondPlayerId);
 
         // Assert
         Assert.Multiple(() => {
-            Assert.That(match.PlayersMatchStates[firstPlayerId].FinishedGames, Is.EqualTo(new List<int> { 6, 4 }));
-            Assert.That(match.PlayersMatchStates[secondPlayerId].FinishedGames, Is.EqualTo(new List<int> { 4, 6 }));
-            Assert.That(match.IsMatchFinished(), Is.False);
+            Assert.That(match.FirstPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 6, 4 }));
+            Assert.That(match.SecondPlayerScores.FinishedSets, Is.EqualTo(new List<int> { 4, 6 }));
+            Assert.That(match.IsMatchFinished, Is.False);
         });
     }
 }
