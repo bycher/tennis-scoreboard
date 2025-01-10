@@ -9,10 +9,11 @@ public class MatchScoreCalculationService {
         if (matchScoreModel.IsGameFinished) {
             UpdateGames(matchScoreModel, winnerId);
 
-            if (matchScoreModel.IsSetFinished && !matchScoreModel.IsMatchFinished)
-                matchScoreModel.StartNewSet();
-            else if (!matchScoreModel.IsMatchFinished)
+            if (!matchScoreModel.IsMatchFinished) {
+                if (matchScoreModel.IsSetFinished)
+                    matchScoreModel.StartNewSet();
                 matchScoreModel.StartNewGame();
+            }
         }
     }
 

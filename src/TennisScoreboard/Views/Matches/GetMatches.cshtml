@@ -1,0 +1,22 @@
+@model IEnumerable<MatchHistoryRecord>
+
+<h1>Matches</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>First Player</th>
+            <th>Second Player</th>
+            <th>Winner</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Model) {
+            <tr>
+                <td>@record.FirstPlayerName</td>
+                <td>@record.SecondPlayerName</td>
+                <td>@record.WinnerName</td>
+            </tr>
+        }
+    </tbody>
+</table>

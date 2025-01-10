@@ -11,6 +11,7 @@ connection.Open();
 builder.Services.AddDbContext<TennisMatchesContext>(options =>
     options.UseSqlite(connection));
 
+builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddSingleton<OngoingMatchesStorage>();
 builder.Services.AddScoped<MatchScoreCalculationService>();
 builder.Services.AddScoped<FinishedMatchesArchiveService>();
@@ -22,8 +23,8 @@ var app = builder.Build();
 app.Lifetime.ApplicationStopping.Register(connection.Close);
 
 using (var scope = app.Services.CreateScope()) {
-    var context = scope.ServiceProvider.GetRequiredService<TennisMatchesContext>();
-    await DbInitializer.InitializeAsync(context);
+    var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
+    await initializer.InitializeAsync();
 }
 
 app.UseHttpsRedirection();
@@ -33,7 +34,7 @@ app.UseRouting();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=NewMatch}/{action=Index}");
+    pattern: "{controller=Home}/{action=Index}");
 app.MapControllerRoute(
     name: "match-score",
     pattern: "match-score",

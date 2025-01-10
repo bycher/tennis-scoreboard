@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using TennisScoreboard.Data;
-using TennisScoreboard.Models;
 using TennisScoreboard.Services;
 
 namespace TennisScoreboard.Controllers;
@@ -26,12 +25,12 @@ public class MatchScoreController(
         var match = ongoingMatchesStorage.Get(uuid);
         if (match == null)
             return NotFound(new { message = $"Match '{uuid}' was not found"});
+        
+        matchScoreCalculationService.UpdateMatchScore(match, winnerId);
 
-        if (!match.IsMatchFinished)
-            matchScoreCalculationService.UpdateMatchScore(match, winnerId);
-        else {
-            match.Match.WinnerId = winnerId;
-            finishedMatchesArchiveService.ArchiveMatch(match);
+        if (match.IsMatchFinished) {
+            finishedMatchesArchiveService.ArchiveMatch(match.Match, winnerId);
+
             if (!ongoingMatchesStorage.Remove(uuid))
                 return StatusCode(500, new { message = $"Failed to remove match '{uuid}' from storage" });
         }
