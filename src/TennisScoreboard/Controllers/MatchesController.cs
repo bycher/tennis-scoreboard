@@ -10,24 +10,32 @@ public class MatchesController(TennisMatchesContext context) : Controller {
 
     [HttpGet]
     [Route("matches")]
-    public async Task<IActionResult> GetMatches(
-        [FromQuery] int page = 1, [FromQuery] string? filterByPlayerName = null
+    public IActionResult GetMatches(
+        int page = 1, 
+        [FromQuery(Name = "filter_by_player_name")] string? filterByPlayerName = null
     ) {
-        var matches = await context.Matches
-            .Where(m => filterByPlayerName == null ||
-                        m.FirstPlayer.Name == filterByPlayerName ||
-                        m.SecondPlayer.Name == filterByPlayerName)
-            .Skip((page - 1) * PageSize)
-            .Take(PageSize)
+        var matches = context.Matches
             .Include(m => m.FirstPlayer)
             .Include(m => m.SecondPlayer)
-            .ToListAsync();
+            .AsEnumerable();
+        var filtered = matches.Where(m => IsFitUnderFilterName(m, filterByPlayerName));
+        var paged = filtered.Skip((page - 1) * PageSize).Take(PageSize);
         
-
-        return View(matches.Select(m => new MatchHistoryRecord {
+        var matchHistoryPaged = paged.Select(m => new MatchHistoryRecord {
             FirstPlayerName = m.FirstPlayer.Name,
             SecondPlayerName = m.SecondPlayer.Name,
             WinnerName = context.Players.Single(p => p.Id == m.WinnerId).Name
-        }));
+        });
+
+        ViewData["TotalPages"] = (int)Math.Ceiling(filtered.Count() / (double)PageSize);
+        ViewData["CurrentPage"] = page;
+        ViewData["Filter"] = filterByPlayerName;
+
+        return View(matchHistoryPaged);
     }
+
+    private static bool IsFitUnderFilterName(Match m, string? filterByPlayerName) =>
+        string.IsNullOrWhiteSpace(filterByPlayerName) ||
+        m.FirstPlayer.Name.Contains(filterByPlayerName) ||
+        m.SecondPlayer.Name.Contains(filterByPlayerName);
 }
