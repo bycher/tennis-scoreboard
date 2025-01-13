@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TennisScoreboard.Models;
 
-[Index(nameof(Name), IsUnique = true)]
+[Index(nameof(Name), IsUnique=true)]
 public class Player
 {
     public int Id { get; set; }

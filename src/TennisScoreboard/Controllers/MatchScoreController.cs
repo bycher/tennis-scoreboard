@@ -36,7 +36,7 @@ public class MatchScoreController : Controller
     }
 
     [HttpPost]
-    public IActionResult Index(Guid uuid, int winnerId)
+    public async Task<IActionResult> Index(Guid uuid, int winnerId)
     {
         var match = _ongoingMatchesStorage.Get(uuid);
         if (match == null)
@@ -45,7 +45,7 @@ public class MatchScoreController : Controller
         _matchScoreCalculationService.UpdateMatchScore(match, winnerId);
         if (match.IsMatchFinished)
         {
-            _finishedMatchesArchiveService.ArchiveMatch(match.Match, winnerId);
+            await _finishedMatchesArchiveService.ArchiveMatch(match.Match, winnerId);
             if (!_ongoingMatchesStorage.Remove(uuid))
                 return StatusCode(500, new { message = $"Failed to remove match '{uuid}' from storage" });
         }

@@ -9,6 +9,7 @@ public class Match
 
     public Player FirstPlayer { get; set; } = null!;
     public Player SecondPlayer { get; set; } = null!;
+    public Player Winner { get; set; } = null!;
 
     public override bool Equals(object? obj)
     {
@@ -21,8 +22,5 @@ public class Match
         return base.Equals(obj);
     }
     
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Id, FirstPlayerId, SecondPlayerId, WinnerId);
-    }
+    public override int GetHashCode() => HashCode.Combine(Id, FirstPlayerId, SecondPlayerId, WinnerId);
 }
