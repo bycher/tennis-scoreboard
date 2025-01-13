@@ -18,7 +18,7 @@ public class TennisMatchesContext : DbContext
     {
         modelBuilder.Entity<Match>()
             .HasOne(m => m.FirstPlayer)
-            .WithMany(p => p.Matches)
+            .WithMany()
             .HasForeignKey(m => m.FirstPlayerId);
         
         modelBuilder.Entity<Match>()

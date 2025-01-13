@@ -17,10 +17,7 @@ public class NewMatchController : Controller
         _ongoingMatchesStorage = ongoingMatchesStorage;
     }
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+    public IActionResult Index() => View();
 
     [HttpPost]
     public async Task<IActionResult> Index(string firstPlayerName, string secondPlayerName)
