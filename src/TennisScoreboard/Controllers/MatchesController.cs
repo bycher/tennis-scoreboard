@@ -5,37 +5,50 @@ using TennisScoreboard.Models;
 
 namespace TennisScoreboard.Controllers;
 
-public class MatchesController(TennisMatchesContext context) : Controller {
+[Route("matches")]
+public class MatchesController : Controller
+{
     private const int PageSize = 5;
+    private readonly TennisMatchesContext _context;
 
-    [HttpGet]
-    [Route("matches")]
-    public IActionResult GetMatches(
+    public MatchesController(TennisMatchesContext context)
+    {
+        _context = context;
+    }
+
+    public IActionResult Index(
         int page = 1, 
-        [FromQuery(Name = "filter_by_player_name")] string? filterByPlayerName = null
-    ) {
-        var matches = context.Matches
+        [FromQuery(Name = "filter_by_player_name")] string? filterByPlayerName = null)
+    {
+        var matches = _context.Matches
             .Include(m => m.FirstPlayer)
             .Include(m => m.SecondPlayer)
             .AsEnumerable();
         var filtered = matches.Where(m => IsFitUnderFilterName(m, filterByPlayerName));
-        var paged = filtered.Skip((page - 1) * PageSize).Take(PageSize);
-        
-        var matchHistoryPaged = paged.Select(m => new MatchHistoryRecord {
-            FirstPlayerName = m.FirstPlayer.Name,
-            SecondPlayerName = m.SecondPlayer.Name,
-            WinnerName = context.Players.Single(p => p.Id == m.WinnerId).Name
+
+        var matchHistoryRecords = filtered
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize)
+            .Select(m => new MatchHistoryRecord
+            {
+                FirstPlayerName = m.FirstPlayer.Name,
+                SecondPlayerName = m.SecondPlayer.Name,
+                WinnerName = _context.Players.Single(p => p.Id == m.WinnerId).Name
+            });
+
+        return View(new MatchHistoryViewModel
+        {
+            Records = matchHistoryRecords,
+            TotalPages = (int)Math.Ceiling(filtered.Count() / (double)PageSize),
+            CurrentPage = page,
+            FilterByPlayerName = filterByPlayerName
         });
-
-        ViewData["TotalPages"] = (int)Math.Ceiling(filtered.Count() / (double)PageSize);
-        ViewData["CurrentPage"] = page;
-        ViewData["Filter"] = filterByPlayerName;
-
-        return View(matchHistoryPaged);
     }
 
-    private static bool IsFitUnderFilterName(Match m, string? filterByPlayerName) =>
-        string.IsNullOrWhiteSpace(filterByPlayerName) ||
-        m.FirstPlayer.Name.Contains(filterByPlayerName) ||
-        m.SecondPlayer.Name.Contains(filterByPlayerName);
+    private static bool IsFitUnderFilterName(Match match, string? filterByPlayerName)
+    {
+        return string.IsNullOrWhiteSpace(filterByPlayerName)
+            || match.FirstPlayer.Name.Contains(filterByPlayerName)
+            || match.SecondPlayer.Name.Contains(filterByPlayerName);
+    }
 }

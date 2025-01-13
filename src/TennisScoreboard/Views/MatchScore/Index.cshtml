@@ -1,0 +1,80 @@
+@model MatchScoreViewModel
+
+@{
+    ViewData["Title"] = "Match Score";
+}
+
+<table>    
+    <thead>
+        <tr>
+            <th>Player</th>
+            @if (!@Model.MatchScore.IsMatchFinished)
+            {
+                <th>Game</th>
+            }
+            @for (int i = 1; i <= Model.MatchScore.FirstPlayerScores.Sets.Count; i++)
+            {
+                <th>Set @i</th>
+            }
+            @if (!@Model.MatchScore.IsMatchFinished)
+            {
+                <th>Set @(Model.MatchScore.FirstPlayerScores.Sets.Count + 1)</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Model.MatchScore.Match.FirstPlayer.Name</td>
+            @if (!@Model.MatchScore.IsMatchFinished)
+            {
+                <td>@Model.MatchScore.FirstPlayerScores.PointsAsString</td>
+            }
+            @foreach (var finishedSet in Model.MatchScore.FirstPlayerScores.Sets)
+            {
+                <td>@finishedSet</td>
+            }
+            @if (!@Model.MatchScore.IsMatchFinished)
+            {
+                <td>@Model.MatchScore.FirstPlayerScores.Games</td>
+            }
+        </tr>
+        <tr>
+            <td>@Model.MatchScore.Match.SecondPlayer.Name</td>
+            @if (!@Model.MatchScore.IsMatchFinished)
+            {
+                <td>@Model.MatchScore.SecondPlayerScores.PointsAsString</td>
+            }
+            @foreach (var finishedSet in Model.MatchScore.SecondPlayerScores.Sets)
+            {
+                <td>@finishedSet</td>
+            }
+            @if (!@Model.MatchScore.IsMatchFinished)
+            {
+                <td>@Model.MatchScore.SecondPlayerScores.Games</td>
+            }
+        </tr>
+    </tbody>
+</table>
+
+
+@if (Model.MatchScore.IsMatchFinished)
+{
+    <div>
+        <h2>Match is finished</h2>
+        <h3>Winner: @(Model.MatchScore.Match.WinnerId == Model.MatchScore.Match.FirstPlayerId
+            ? Model.MatchScore.Match.FirstPlayer.Name
+            : Model.MatchScore.Match.SecondPlayer.Name)</h3>
+    </div>
+}
+else
+{
+    <div>
+        <form method="post" asp-route-uuid=@Model.Uuid>
+            <button type="submit" name="winnerId" value=@Model.MatchScore.Match.FirstPlayerId>Player 1 wins a point</button>
+        </form>
+
+        <form method="post" asp-route-uuid=@Model.Uuid>
+            <button type="submit" name="winnerId" value=@Model.MatchScore.Match.SecondPlayerId>Player 2 wins a point</button>
+        </form>
+    </div>
+}

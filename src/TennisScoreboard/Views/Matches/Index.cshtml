@@ -1,0 +1,50 @@
+@model MatchHistoryViewModel
+
+@{
+    ViewData["Title"] = "History";
+}
+
+<div class="search-panel">
+    <form method="get">
+        <label asp-for="FilterByPlayerName">Filter:</label>
+        <input type="text" asp-for="FilterByPlayerName" name="filter_by_player_name"
+                placeholder="Enter player name..."/>
+        <button type="submit">Apply</button>
+        <button type="reset" onclick="resetFilter()">Reset</button>
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>First Player</th>
+            <th>Second Player</th>
+            <th>Winner</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Model.Records)
+        {
+            <tr>
+                <td>@record.FirstPlayerName</td>
+                <td>@record.SecondPlayerName</td>
+                <td>@record.WinnerName</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @if (Model.CurrentPage > 1)
+    {
+        <a asp-route-page=@Model.PreviousPage asp-route-filter_by_player_name=@Model.FilterByPlayerName>Previous</a>
+    }
+    @for (int page = 1; page <= Model.TotalPages; page++)
+    {
+        <a asp-route-page=@(page) asp-route-filter_by_player_name=@Model.FilterByPlayerName class=@Model.GetCssForPage(page)>@(page)</a>
+    }
+    @if (Model.CurrentPage < Model.TotalPages)
+    {   
+        <a asp-route-page=@Model.NextPage asp-route-filter_by_player_name=@Model.FilterByPlayerName>Next</a>
+    }
+</div>

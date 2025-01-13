@@ -3,15 +3,26 @@ using TennisScoreboard.Models;
 
 namespace TennisScoreboard.Services;
 
-public class FinishedMatchesArchiveService(TennisMatchesContext context) {
-    public void ArchiveMatch(Match match, int winnerId) {
+public class FinishedMatchesArchiveService
+{
+    private readonly TennisMatchesContext context;
+
+    public FinishedMatchesArchiveService(TennisMatchesContext context)
+    {
+        this.context = context;
+    }
+
+    public void ArchiveMatch(Match match, int winnerId)
+    {
         match.WinnerId = winnerId;
-        
-        context.Matches.Add(new Match {
+        var matchToAdd = new Match
+        {
             FirstPlayerId = match.FirstPlayerId,
             SecondPlayerId = match.SecondPlayerId,
             WinnerId = match.WinnerId
-        });
+        };
+        
+        context.Matches.Add(matchToAdd);
         context.SaveChanges();
     }
 }

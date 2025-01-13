@@ -1,15 +1,17 @@
-<h1>New match</h1>
+@{
+    ViewData["Title"] = "New Match";
+}
 
-<form asp-controller="NewMatch" asp-action="NewMatch" method="post">
-    <label for="firstPlayerName">Player #1 name</label>
-    <input type="text" id="firstPlayerName" name="firstPlayerName" required />
-    <br /> <br />
-
-    <label for="secondPlayerName">Player #2 name</label>
-    <input type="text" id="secondPlayerName" name="secondPlayerName" required />
-    <br /> <br />
-
-    <button type="submit">Start new match</button>
+<form method="post">
+    <p>
+        <label for="firstPlayerName">First player</label><br />
+        <input type="text" id="firstPlayerName" name="firstPlayerName" placeholder="Enter player name..." required />
+    </p>
+    <p>
+        <label for="secondPlayerName">Second player</label><br />
+        <input type="text" id="secondPlayerName" name="secondPlayerName" placeholder="Enter player name..." required />
+    </p>
+    <p>
+        <input type="submit" value="Start" />
+    </p>
 </form>
-
-<a asp-action="Index" asp-controller="Home">Go to homepage</a>

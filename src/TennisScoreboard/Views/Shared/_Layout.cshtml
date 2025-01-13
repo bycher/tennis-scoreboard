@@ -3,14 +3,23 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Tennis Board</title>
-    <link rel="stylesheet" href="~/css/styles.css" />
+    <title>@ViewData["Title"] | Tennis Scoreboard</title>
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true"/>
 </head>
 <body>
+    <nav>
+        <ul>
+            <li><a asp-controller="Home">Home</a></li>
+            <li><a asp-controller="NewMatch">New Match</a></li>
+            <li><a asp-controller="Matches">Matches</a></li>
+        </ul>
+    </nav>
+    <h2>@ViewData["Title"]</h2>
     <div>
         <main role="main">
             @RenderBody()
         </main>
     </div>
+    <script src="~/js/site.js"></script>
 </body>
 </html>

@@ -2,40 +2,48 @@ using TennisScoreboard.Models;
 
 namespace TennisScoreboard.Services;
 
-public class MatchScoreCalculationService {
-    public void UpdateMatchScore(MatchScoreModel matchScoreModel, int winnerId) {
-        UpdatePoints(matchScoreModel, winnerId);
+public class MatchScoreCalculationService
+{
+    public void UpdateMatchScore(MatchScore MatchScore, int winnerId)
+    {
+        UpdatePoints(MatchScore, winnerId);
         
-        if (matchScoreModel.IsGameFinished) {
-            UpdateGames(matchScoreModel, winnerId);
+        if (MatchScore.IsGameFinished)
+        {
+            UpdateGames(MatchScore, winnerId);
 
-            if (!matchScoreModel.IsMatchFinished) {
-                if (matchScoreModel.IsSetFinished)
-                    matchScoreModel.StartNewSet();
-                matchScoreModel.StartNewGame();
+            if (!MatchScore.IsMatchFinished)
+            {
+                if (MatchScore.IsSetFinished)
+                    MatchScore.StartNewSet();
+                MatchScore.StartNewGame();
             }
         }
     }
 
-    private static void UpdateGames(MatchScoreModel matchScoreModel, int winnerId) {
-        if (winnerId == matchScoreModel.Match.FirstPlayerId)
-            matchScoreModel.FirstPlayerScores.Games++;
+    private static void UpdateGames(MatchScore MatchScore, int winnerId)
+    {
+        if (winnerId == MatchScore.Match.FirstPlayerId)
+            MatchScore.FirstPlayerScores.Games++;
         else
-            matchScoreModel.SecondPlayerScores.Games++;
+            MatchScore.SecondPlayerScores.Games++;
     }
 
-    private static void UpdatePoints(MatchScoreModel matchScoreModel, int winnerId) {
-        if (winnerId == matchScoreModel.Match.FirstPlayerId) {
-            if (matchScoreModel.IsAdvantage)
-                matchScoreModel.SecondPlayerScores.Points--;
+    private static void UpdatePoints(MatchScore MatchScore, int winnerId)
+    {
+        if (winnerId == MatchScore.Match.FirstPlayerId)
+        {
+            if (MatchScore.IsAdvantage)
+                MatchScore.SecondPlayerScores.Points--;
             else
-                matchScoreModel.FirstPlayerScores.Points++;
+                MatchScore.FirstPlayerScores.Points++;
         }
-        else {
-            if (matchScoreModel.IsAdvantage)
-                matchScoreModel.FirstPlayerScores.Points--;
+        else
+        {
+            if (MatchScore.IsAdvantage)
+                MatchScore.FirstPlayerScores.Points--;
             else
-                matchScoreModel.SecondPlayerScores.Points++;
+                MatchScore.SecondPlayerScores.Points++;
         }
     }
 }
