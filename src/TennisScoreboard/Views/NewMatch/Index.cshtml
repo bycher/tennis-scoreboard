@@ -1,17 +1,20 @@
+@model NewMatch
+
 @{
     ViewData["Title"] = "New Match";
 }
 
-<form method="post">
-    <p>
-        <label for="firstPlayerName">First player</label><br />
-        <input type="text" id="firstPlayerName" name="firstPlayerName" placeholder="Enter player name..." required />
-    </p>
-    <p>
-        <label for="secondPlayerName">Second player</label><br />
-        <input type="text" id="secondPlayerName" name="secondPlayerName" placeholder="Enter player name..." required />
-    </p>
-    <p>
-        <input type="submit" value="Start" />
-    </p>
+<form method="post" class="new-match-form">
+    <div asp-validation-summary="ModelOnly" class="validation-summary validation"></div>
+    <div class="player-input">
+        <label asp-for="FirstPlayerName">First player</label>
+        <input asp-for="FirstPlayerName" placeholder="Enter player name..." />
+        <span asp-validation-for="FirstPlayerName" class="validation"/>
+    </div>
+    <div class="player-input">
+        <label asp-for="SecondPlayerName">Second player</label>
+        <input asp-for="SecondPlayerName" placeholder="Enter player name..." />
+        <span asp-validation-for="SecondPlayerName" class="validation"/>
+    </div>
+    <button type="submit">Start</button>
 </form>

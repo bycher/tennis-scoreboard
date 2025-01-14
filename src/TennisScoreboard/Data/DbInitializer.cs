@@ -3,7 +3,7 @@ using TennisScoreboard.Models;
 
 namespace TennisScoreboard.Data;
 
-public class DbInitializer
+public class DbInitializer(TennisMatchesContext context)
 {
     private readonly List<Player> _players = [
         new Player { Name = "Roger Federer" },
@@ -18,12 +18,7 @@ public class DbInitializer
         new Player { Name = "Daniil Medvedev" }
     ];
     private readonly Random _rand = new();
-    private readonly TennisMatchesContext _context;
-
-    public DbInitializer(TennisMatchesContext context)
-    {
-        _context = context;
-    }
+    private readonly TennisMatchesContext _context = context;
 
     public async Task InitializeAsync()
     {

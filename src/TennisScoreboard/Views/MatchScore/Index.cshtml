@@ -7,6 +7,7 @@
 @if (Model.MatchScore.IsMatchFinished)
 {
     await Html.RenderPartialAsync("FinishedScoreTable");
+
     <div>
         <h2>Match is finished</h2>
         <h3>Winner: @Model.MatchScore.WinnerName</h3>
@@ -15,14 +16,13 @@
 else
 {
     await Html.RenderPartialAsync("OngoingScoreTable");
-    <div class="scoring-form">
-        <form method="post" asp-route-uuid=@Model.Uuid>
-            <button type="submit" name="winnerId" value="@Model.MatchScore.Match.FirstPlayerId">
-                @Model.MatchScore.Match.FirstPlayer.Name won point
-            </button>
-            <button type="submit" name="winnerId" value="@Model.MatchScore.Match.SecondPlayerId">
-                @Model.MatchScore.Match.SecondPlayer.Name won point
-            </button>
-        </form>
-    </div>
+
+    <form method="post" asp-route-uuid=@Model.Uuid class="match-scoring-form">
+        <button type="submit" name="winnerId" value="@Model.MatchScore.Match.FirstPlayerId">
+            @Model.MatchScore.Match.FirstPlayer.Name won point
+        </button>
+        <button type="submit" name="winnerId" value="@Model.MatchScore.Match.SecondPlayerId">
+            @Model.MatchScore.Match.SecondPlayer.Name won point
+        </button>
+    </form>
 }

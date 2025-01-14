@@ -26,20 +26,21 @@ public class FinishedMatchesArchiveService
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<MatchHistoryRecord>> GetFilteredMatchHistoryRecords(string? filterByPlayerName)
+    public async Task<IEnumerable<MatchesHistoryRecord>> GetFilteredMatchHistoryRecords(string? filterByPlayerName)
     {
         var matches = await _context.Matches
             .Include(m => m.FirstPlayer)
             .Include(m => m.SecondPlayer)
             .Include(m => m.Winner)
             .ToListAsync();
+        var filter = new MatchesHistoryFilter(filterByPlayerName);
 
-        return matches.Select(m => new MatchHistoryRecord
+        return matches.Select(m => new MatchesHistoryRecord
             {
                 FirstPlayerName = m.FirstPlayer.Name,
                 SecondPlayerName = m.SecondPlayer.Name,
                 WinnerName = m.Winner.Name
             })
-            .Where(mhr => mhr.IsFitUnderFilter(filterByPlayerName));
+            .Where(mhr => mhr.IsFitUnderFilter(filter));
     }
 }

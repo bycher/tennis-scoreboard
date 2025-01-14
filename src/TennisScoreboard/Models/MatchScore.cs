@@ -15,9 +15,15 @@ public class MatchScore
     public Scores FirstPlayerScores { get; set; } = new();
     public Scores SecondPlayerScores { get; set; } = new();
 
-    public MatchScore(Match match)
+    public MatchScore(Player firstPlayer, Player secondPlayer)
     {
-        Match = match;
+        Match = new Match
+        {
+            FirstPlayerId = firstPlayer.Id,
+            SecondPlayerId = secondPlayer.Id,
+            FirstPlayer = firstPlayer,
+            SecondPlayer = secondPlayer
+        };
     }
 
     public MatchScore(int firstPlayerId, int secondPlayerId)

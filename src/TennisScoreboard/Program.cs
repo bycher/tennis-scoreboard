@@ -14,6 +14,7 @@ builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddSingleton<OngoingMatchesStorage>();
 builder.Services.AddScoped<MatchScoreCalculationService>();
 builder.Services.AddScoped<FinishedMatchesArchiveService>();
+builder.Services.AddScoped<PlayersService>();
 
 builder.Services.AddControllersWithViews();
 

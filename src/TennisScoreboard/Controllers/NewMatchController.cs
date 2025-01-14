@@ -1,58 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TennisScoreboard.Data;
 using TennisScoreboard.Models;
+using TennisScoreboard.Services;
 
 namespace TennisScoreboard.Controllers;
 
 [Route("new-match")]
-public class NewMatchController : Controller
+public class NewMatchController(
+    OngoingMatchesStorage ongoingMatchesStorage, PlayersService playersService) : Controller
 {
-    private readonly TennisMatchesContext _context;
-    private readonly OngoingMatchesStorage _ongoingMatchesStorage;
-
-    public NewMatchController(TennisMatchesContext context, OngoingMatchesStorage ongoingMatchesStorage)
-    {
-        _context = context;
-        _ongoingMatchesStorage = ongoingMatchesStorage;
-    }
+    private readonly PlayersService _playersService = playersService;
+    private readonly OngoingMatchesStorage _ongoingMatchesStorage = ongoingMatchesStorage;
 
     public IActionResult Index() => View();
 
     [HttpPost]
-    public async Task<IActionResult> Index(string firstPlayerName, string secondPlayerName)
+    public async Task<IActionResult> Index(NewMatch newMatch)
     {
-        await AddPlayer(firstPlayerName);
-        await AddPlayer(secondPlayerName);
+        if (!ModelState.IsValid)
+            return View(newMatch);
 
-        var firstPlayer = _context.Players.Single(p => p.Name == firstPlayerName);
-        var secondPlayer = _context.Players.Single(p => p.Name == secondPlayerName);
-        
-        var match = new Match
-        {
-            FirstPlayerId = firstPlayer.Id,
-            SecondPlayerId = secondPlayer.Id,
-            FirstPlayer = firstPlayer,
-            SecondPlayer = secondPlayer
-        };
-        var key = _ongoingMatchesStorage.Add(new MatchScore(match));
+        var firstPlayer = await _playersService.AddPlayer(newMatch.FirstPlayerName!);
+        var secondPlayer = await _playersService.AddPlayer(newMatch.SecondPlayerName!);
+
+        var key = _ongoingMatchesStorage.Add(firstPlayer, secondPlayer);
 
         return Redirect($"/match-score?uuid={key}");
-    }
-
-    private async Task AddPlayer(string name)
-    {
-        try
-        {
-            var player = new Player { Name = name };
-            if (_context.Players.Any(p => p.Name == name))
-                return;
-            await _context.Players.AddAsync(player);
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateException)
-        {
-            Console.WriteLine("Player already exists. Do nothing.");
-        }
     }
 }

@@ -6,21 +6,14 @@ using TennisScoreboard.Services;
 namespace TennisScoreboard.Controllers;
 
 [Route("match-score")]
-public class MatchScoreController : Controller
+public class MatchScoreController(
+    OngoingMatchesStorage ongoingMatchesStorage,
+    MatchScoreCalculationService matchScoreCalculationService,
+    FinishedMatchesArchiveService finishedMatchesArchiveService) : Controller
 {
-    private readonly OngoingMatchesStorage _ongoingMatchesStorage;
-    private readonly MatchScoreCalculationService _matchScoreCalculationService;
-    private readonly FinishedMatchesArchiveService _finishedMatchesArchiveService;
-
-    public MatchScoreController(
-        OngoingMatchesStorage ongoingMatchesStorage,
-        MatchScoreCalculationService matchScoreCalculationService, 
-        FinishedMatchesArchiveService finishedMatchesArchiveService)
-    {
-        _ongoingMatchesStorage = ongoingMatchesStorage;
-        _matchScoreCalculationService = matchScoreCalculationService;
-        _finishedMatchesArchiveService = finishedMatchesArchiveService;
-    }
+    private readonly OngoingMatchesStorage _ongoingMatchesStorage = ongoingMatchesStorage;
+    private readonly MatchScoreCalculationService _matchScoreCalculationService = matchScoreCalculationService;
+    private readonly FinishedMatchesArchiveService _finishedMatchesArchiveService = finishedMatchesArchiveService;
 
     public IActionResult Index(Guid uuid)
     {
@@ -28,11 +21,7 @@ public class MatchScoreController : Controller
         if (match == null)
             return NotFound(new { message = $"Match witch guid {uuid} was not found"});
 
-        return View(new MatchScoreViewModel
-        {
-            MatchScore = match,
-            Uuid = uuid
-        });
+        return View(new MatchScoreViewModel(match, uuid));
     }
 
     [HttpPost]
@@ -50,10 +39,6 @@ public class MatchScoreController : Controller
                 return StatusCode(500, new { message = $"Failed to remove match '{uuid}' from storage" });
         }
 
-        return View(new MatchScoreViewModel
-        {
-            MatchScore = match,
-            Uuid = uuid
-        });
+        return View(new MatchScoreViewModel(match, uuid));
     }
 }
