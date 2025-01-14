@@ -53,10 +53,10 @@ public class DbInitializer
         for (var firstPlayerId = 1; firstPlayerId < playerIds.Count; firstPlayerId++)
             for (var secondPlayerId = firstPlayerId + 1; secondPlayerId < playerIds.Count + 1; secondPlayerId++)
             {
-                var firstPlayer = _context.Players.Find(firstPlayerId) ??
-                    throw new InvalidOperationException("Player not found");
-                var secondPlayer = _context.Players.Find(secondPlayerId) ??
-                    throw new InvalidOperationException("Player not found");
+                var firstPlayer = _context.Players.Find(firstPlayerId)
+                    ?? throw new InvalidOperationException("Player not found");
+                var secondPlayer = _context.Players.Find(secondPlayerId)
+                    ?? throw new InvalidOperationException("Player not found");
                 
                 var match = new Match
                 {
@@ -72,8 +72,6 @@ public class DbInitializer
             }
     }
 
-    private int GetRandomWinner(int firstPlayerId, int secondPlayerId)
-    {
-        return _rand.Next(2) == 0 ? firstPlayerId : secondPlayerId;
-    }
+    private int GetRandomWinner(int firstPlayerId, int secondPlayerId) =>
+        _rand.Next(2) == 0 ? firstPlayerId : secondPlayerId;
 }

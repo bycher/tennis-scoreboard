@@ -1,0 +1,33 @@
+@model MatchScoreViewModel
+
+@{
+    int setsCount = Model.MatchScore.FirstPlayerScores.Sets.Count;
+}
+
+<table>    
+    <thead>
+        <tr>
+            <th>Player</th>
+            @for (int set = 1; set <= setsCount; set++)
+            {
+                <th>Set @set</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Model.MatchScore.Match.FirstPlayer.Name</td>
+            @foreach (int set in Model.MatchScore.FirstPlayerScores.Sets)
+            {
+                <td>@set</td>
+            }
+        </tr>
+        <tr>
+            <td>@Model.MatchScore.Match.SecondPlayer.Name</td>
+            @foreach (int set in Model.MatchScore.SecondPlayerScores.Sets)
+            {
+                <td>@set</td>
+            }
+        </tr>
+    </tbody>
+</table>

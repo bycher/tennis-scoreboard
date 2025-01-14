@@ -77,4 +77,8 @@ public class MatchScore
         FirstPlayerScores.ResetGames();
         SecondPlayerScores.ResetGames();
     }
+
+    public string WinnerName => Match.WinnerId == Match.FirstPlayerId
+                                ? Match.FirstPlayer.Name
+                                : Match.SecondPlayer.Name;
 }
