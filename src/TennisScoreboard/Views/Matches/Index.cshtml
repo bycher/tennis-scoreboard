@@ -9,8 +9,8 @@
         <label asp-for="FilterByPlayerName">Filter:</label>
         <input asp-for="FilterByPlayerName" name="filter_by_player_name" placeholder="Enter player name..."/>
     </div>
-    <button type="submit">Apply</button>
-    <button type="reset" onclick="resetFilter()">Reset</button>
+    <button type="submit" class="filter-button">Apply</button>
+    <button type="reset" onclick="resetFilter()" class="filter-button">Reset</button>
 </form>
 
 <table>
@@ -36,7 +36,7 @@
 <div class="pagination">
     @if (Model.CurrentPage > 1)
     {
-        <a asp-route-page=@Model.PreviousPage asp-route-filter_by_player_name=@Model.FilterByPlayerName>Previous</a>
+        <a asp-route-page=@Model.PreviousPage asp-route-filter_by_player_name=@Model.FilterByPlayerName>Prev</a>
     }
     @for (int page = 1; page <= Model.TotalPages; page++)
     {

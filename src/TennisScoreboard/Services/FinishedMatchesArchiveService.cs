@@ -4,14 +4,9 @@ using TennisScoreboard.Models;
 
 namespace TennisScoreboard.Services;
 
-public class FinishedMatchesArchiveService
+public class FinishedMatchesArchiveService(TennisMatchesContext context)
 {
-    private readonly TennisMatchesContext _context;
-
-    public FinishedMatchesArchiveService(TennisMatchesContext context)
-    {
-        _context = context;
-    }
+    private readonly TennisMatchesContext _context = context;
 
     public async Task ArchiveMatch(Match match, int winnerId)
     {

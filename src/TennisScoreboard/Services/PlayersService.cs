@@ -1,26 +1,31 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using TennisScoreboard.Data;
 using TennisScoreboard.Models;
 
 namespace TennisScoreboard.Services;
 
-public class PlayersService
+public class PlayersService(TennisMatchesContext context)
 {
-    private readonly TennisMatchesContext _context;
+    private readonly TennisMatchesContext _context = context;
 
-    public PlayersService(TennisMatchesContext context)
+    public async Task<Player> AddPlayer(string playerName)
     {
-        _context = context;
+        var player = new Player { Name = playerName };
+
+        try
+        {
+            var playerEntry = await _context.Players.AddAsync(player);
+            await _context.SaveChangesAsync();
+            return playerEntry.Entity;
+        }
+        catch (DbUpdateException ex) when (IsUniqueConstraintVioldated(ex))
+        {
+            _context.Entry(player).State = EntityState.Detached;
+            return await _context.Players.SingleAsync(p => p.Name == playerName);
+        }
     }
 
-    public async Task<Player> AddPlayer(string name)
-    {
-        if (_context.Players.Any(p => p.Name == name))
-            return _context.Players.Single(p => p.Name == name);
-
-        var player = await _context.Players.AddAsync(new Player { Name = name });
-        await _context.SaveChangesAsync();
-
-        return player.Entity;
-    }
+    private static bool IsUniqueConstraintVioldated(DbUpdateException ex) => 
+        ex.InnerException is SqliteException sqliteEx && sqliteEx.SqliteErrorCode == 19;
 }

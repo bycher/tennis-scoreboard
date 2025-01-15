@@ -4,25 +4,30 @@
     ViewData["Title"] = "Match Score";   
 }
 
-@if (Model.MatchScore.IsMatchFinished)
-{
-    await Html.RenderPartialAsync("FinishedScoreTable");
+<div class="match-score">
+    @if (Model.MatchScore.IsMatchFinished)
+    {
+        await Html.RenderPartialAsync("FinishedScoreTable");
 
-    <div>
-        <h2>Match is finished</h2>
-        <h3>Winner: @Model.MatchScore.WinnerName</h3>
-    </div>
-}
-else
-{
-    await Html.RenderPartialAsync("OngoingScoreTable");
+        <div class="finished-match-text-container">
+            <div class="finished-match-main-text">Match is finished!</div>
+            <div class="finished-match-support-text">Winner is <b>@Model.MatchScore.WinnerName</b></div>
+        </div>  
+    }
+    else
+    {
+        await Html.RenderPartialAsync("OngoingScoreTable");
 
-    <form method="post" asp-route-uuid=@Model.Uuid class="match-scoring-form">
-        <button type="submit" name="winnerId" value="@Model.MatchScore.Match.FirstPlayerId">
-            @Model.MatchScore.Match.FirstPlayer.Name won point
-        </button>
-        <button type="submit" name="winnerId" value="@Model.MatchScore.Match.SecondPlayerId">
-            @Model.MatchScore.Match.SecondPlayer.Name won point
-        </button>
-    </form>
-}
+        <div class="match-scoring-menu">
+            <div class="match-scoring-title">Who won point?</div>
+            <form method="post" asp-route-uuid=@Model.Uuid class="match-scoring-form">
+                <button type="submit" name="winnerId" value="@Model.MatchScore.Match.FirstPlayerId" class="submit-button first-player">
+                    @Model.MatchScore.Match.FirstPlayer.Name
+                </button>
+                <button type="submit" name="winnerId" value="@Model.MatchScore.Match.SecondPlayerId" class="submit-button second-player">
+                    @Model.MatchScore.Match.SecondPlayer.Name
+                </button>
+            </form>
+        </div>
+    }
+</div>
