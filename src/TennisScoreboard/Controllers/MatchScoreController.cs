@@ -29,7 +29,11 @@ public class MatchScoreController(
         if (matchScore is null)
             return NotFound(new { message = MatchNotFoundMessage(uuid) });
 
-        return View(MatchScoreViewName, new MatchScoreViewModel(matchScore, uuid));
+        return View(MatchScoreViewName, new MatchScoreViewModel
+        {
+            MatchScore = matchScore,
+            Uuid = uuid
+        });
     }
 
     [HttpPost]
@@ -47,13 +51,14 @@ public class MatchScoreController(
             return BadRequest(new { message = "Winner ID must be equal to one of player's ID" });
 
         _matchScoreCalculationService.UpdateMatchScore(context);
-
         if (matchScore.IsMatchFinished)
-        {
             await _matchesHistoryService.AddToHistory(context);
-            _ongoingMatchesService.Remove(request.Uuid);
-        }
 
-        return View(MatchScoreViewName, new MatchScoreViewModel(matchScore, request.Uuid));
+        return View(MatchScoreViewName, new MatchScoreViewModel
+        {
+            MatchScore = matchScore,
+            Uuid = request.Uuid,
+            WinnerId = request.WinnerId
+        });
     }
 }

@@ -14,7 +14,7 @@ public class PlayerScoresDto
         Games = 0;
     }
 
-    public string PointsAsString => Points switch
+    public string PointsAsString(bool IsTieBreak) => IsTieBreak ? Points.ToString() : Points switch
     {
         0 => "0",
         1 => "15",
@@ -22,15 +22,5 @@ public class PlayerScoresDto
         3 => "40",
         4 => "AD",
         _ => throw new ArgumentException("Invalid point")
-    };
-
-    public static int PointsAsInt(string pointsString) => pointsString switch
-    {
-        "0" => 0,
-        "15" => 1,
-        "30" => 2,
-        "40" => 3,
-        "AD" => 4,
-        _ => throw new ArgumentException("Invalid points string")
     };
 }

@@ -30,30 +30,28 @@ public class DbInitializer(
         await _context.Database.EnsureCreatedAsync();        
 
         var players = await InitializePlayers();
-        await InitializeMatches(players);
+        await InitializeMatches(players.ToList());
     }
 
     private async Task<IEnumerable<Player>> InitializePlayers() =>
         await Task.WhenAll(_playerNames.Select(async pn => await _playersService.AddPlayer(pn)));
 
-    private async Task InitializeMatches(IEnumerable<Player> players)
+    private async Task InitializeMatches(List<Player> players)
     {
-        var playerIds = players.Select(p => p.Id).ToList();
-
         // Seed with all pairs of players from _players and random winner
-        for (int firstPlayerId = 1; firstPlayerId < playerIds.Count; firstPlayerId++)
+        for (int i = 0; i < players.Count; i++)
         {
-            for (int secondPlayerId = firstPlayerId + 1; secondPlayerId < playerIds.Count + 1; secondPlayerId++)
+            for (int j = i + 1; j < players.Count; j++)
             {   
-                var matchScore = new MatchScoreDto(firstPlayerId, secondPlayerId);
-                var context = new MatchScoreUpdateContextDto(
-                    matchScore, GetRandomWinner(firstPlayerId, secondPlayerId));
+                var matchScore = new MatchScoreDto(players[i], players[j]);
+                var winnerId = GetRandomWinnerId(players[i], players[j]);
+                var context = new MatchScoreUpdateContextDto(matchScore, winnerId);
                 
                 await _matchesHistoryService.AddToHistory(context);
             }
         }
     }
 
-    private int GetRandomWinner(int firstPlayerId, int secondPlayerId) =>
-        _rand.Next(2) == 0 ? firstPlayerId : secondPlayerId;
+    private int GetRandomWinnerId(Player firstPlayer, Player secondPlayer) =>
+        _rand.Next(2) == 0 ? firstPlayer.Id : secondPlayer.Id;
 }

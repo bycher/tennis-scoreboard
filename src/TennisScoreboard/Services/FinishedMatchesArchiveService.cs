@@ -13,8 +13,8 @@ public class MatchesHistoryService(TennisMatchesContext context)
     {
         var matchToAdd = new Match
         {
-            FirstPlayerId = context.MatchScore.Match.FirstPlayerId,
-            SecondPlayerId = context.MatchScore.Match.SecondPlayerId,
+            FirstPlayerId = context.MatchScore.FirstPlayer.Id,
+            SecondPlayerId = context.MatchScore.SecondPlayer.Id,
             WinnerId = context.WinnerId
         };
         

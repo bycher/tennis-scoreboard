@@ -1,51 +1,58 @@
 using TennisScoreboard.Models.Dtos;
+using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Tests.Utils;
 
 public class MatchScoreBuilder(int firstPlayerId, int secondPlayerId)
 {
-    private readonly MatchScoreDto _MatchScore = new(firstPlayerId, secondPlayerId);
+    private readonly MatchScoreDto _matchScore = new(
+        new Player { Id = firstPlayerId },
+        new Player { Id = secondPlayerId }
+    );
 
-    public MatchScoreBuilder WithPoints(string pointsString)
+    public MatchScoreBuilder WithPoints(string firstPlayerPointsString, string secondPlayerPointsString)
     {
-        var points = pointsString.Split(':').Select(PlayerScoresDto.PointsAsInt).ToList();
+        var firstPlayerPoints = PointsAsInt(firstPlayerPointsString);
+        var secondPlayerPoints = PointsAsInt(secondPlayerPointsString);
 
-        _MatchScore.FirstPlayerScores.Points = points[0];
-        _MatchScore.SecondPlayerScores.Points = points[1];
+        _matchScore.SetScoreComponents(firstPlayerPoints, secondPlayerPoints, nameof(PlayerScoresDto.Points));
 
         return this;
     }
 
-    public MatchScoreBuilder WithTieBreak(string tieBreakPointsString)
+    public MatchScoreBuilder WithTieBreak(int firstPlayerPoints, int secondPlayerPoints)
     {
-        var points = tieBreakPointsString.Split(':').Select(int.Parse).ToList();
+        _matchScore.SetScoreComponents(firstPlayerPoints, secondPlayerPoints, nameof(PlayerScoresDto.Points));
 
-        _MatchScore.FirstPlayerScores.Points = points[0];
-        _MatchScore.SecondPlayerScores.Points = points[1];
-
-        return WithGames("6:6");
+        return WithGames(6, 6);
     }
 
-    public MatchScoreBuilder WithGames(string gamesString)
+    public MatchScoreBuilder WithGames(int firstPlayerGames, int secondPlayerGames)
     {
-        var games = gamesString.Split(':').Select(int.Parse).ToList();
-
-        _MatchScore.FirstPlayerScores.Games = games[0];
-        _MatchScore.SecondPlayerScores.Games = games[1];
+        _matchScore.SetScoreComponents(firstPlayerGames, secondPlayerGames, nameof(PlayerScoresDto.Games));
 
         return this;
     }
 
-    public MatchScoreBuilder WithSets(List<Tuple<int, int>> Sets)
+    public MatchScoreBuilder WithSets(List<(int First, int Second)> Sets)
     {
-        var firstPlayerSets = Sets.Select(set => set.Item1).ToList();
-        var secondPlayerSets = Sets.Select(set => set.Item2).ToList();
+        var firstPlayerSets = Sets.Select(set => set.First).ToList();
+        var secondPlayerSets = Sets.Select(set => set.Second).ToList();
 
-        _MatchScore.FirstPlayerScores.Sets = firstPlayerSets;
-        _MatchScore.SecondPlayerScores.Sets = secondPlayerSets;
+        _matchScore.SetScoreComponents(firstPlayerSets, secondPlayerSets, nameof(PlayerScoresDto.Sets));
 
         return this;
     }
 
-    public MatchScoreDto Build() => _MatchScore;
+    public MatchScoreDto Build() => _matchScore;
+
+    private static int PointsAsInt(string pointsAsString) => pointsAsString switch
+    {
+        "0" => 0,
+        "15" => 1,
+        "30" => 2,
+        "40" => 3,
+        "AD" => 4,
+        _ => throw new ArgumentException("Invalid points string")
+    };
 }

@@ -13,9 +13,8 @@ public class MatchHistoryViewModel
     public int NextPage => CurrentPage + 1;
     public int PreviousPage => CurrentPage - 1;
 
-    public IEnumerable<MatchesHistoryRecordDto> PagedRecords => Records
-        .Skip((CurrentPage - 1) * PageSize)
-        .Take(PageSize);
+    public IEnumerable<MatchesHistoryRecordDto> PagedRecords => Records.Skip((CurrentPage - 1) * PageSize)
+                                                                       .Take(PageSize);
 
     public int TotalPages => (int)Math.Ceiling(Records.Count() / (double)PageSize);
 }

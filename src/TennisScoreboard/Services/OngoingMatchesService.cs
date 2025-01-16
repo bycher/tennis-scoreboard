@@ -13,6 +13,4 @@ public class OngoingMatchesService {
         _storage.Add(key, match);
         return key;
     }
-
-    public bool Remove(Guid key) => _storage.Remove(key);
 }

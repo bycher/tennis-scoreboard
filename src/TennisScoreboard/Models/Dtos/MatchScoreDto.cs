@@ -4,6 +4,20 @@ namespace TennisScoreboard.Models.Dtos;
 
 public class MatchScoreDto
 {
+    public Player FirstPlayer { get; set; }
+    public Player SecondPlayer { get; set; }
+
+    private readonly Dictionary<int, PlayerScoresDto> _playersScores = [];
+
+    public MatchScoreDto(Player firstPlayer, Player secondPlayer)
+    {
+        FirstPlayer = firstPlayer;
+        SecondPlayer = secondPlayer;
+
+        _playersScores[firstPlayer.Id] = new PlayerScoresDto();
+        _playersScores[secondPlayer.Id] = new PlayerScoresDto();
+    }
+
     private const int MinPointsToWin = 4;
     private const int MinTieBreakPointsToWin = 7;
     private const int MinPointsDifferenceToWin = 2;
@@ -13,38 +27,9 @@ public class MatchScoreDto
 
     private const int MinSetsToWin = 2;
 
-    public Match Match { get; set; }
-    public PlayerScoresDto FirstPlayerScores { get; set; } = new();
-    public PlayerScoresDto SecondPlayerScores { get; set; } = new();
-
-    public MatchScoreDto(Player firstPlayer, Player secondPlayer)
-    {
-        Match = new Match
-        {
-            FirstPlayerId = firstPlayer.Id,
-            SecondPlayerId = secondPlayer.Id,
-            FirstPlayer = firstPlayer,
-            SecondPlayer = secondPlayer
-        };
-    }
-
-    public MatchScoreDto(int firstPlayerId, int secondPlayerId)
-    {
-        Match = new Match
-        {
-            FirstPlayerId = firstPlayerId,
-            SecondPlayerId = secondPlayerId,
-        };
-    }
-
-    public bool IsAdvantage => (FirstPlayerScores.Points == MinPointsToWin
-                            || SecondPlayerScores.Points == MinPointsToWin)
-                            && PointsDifference == MinPointsDifferenceToWin - 1;
+    public int NumberOfSets => _playersScores[FirstPlayer.Id].Sets.Count;
 
     public bool IsGameFinished => IsTieBreak ? IsTieBreakFinished : IsRegularGameFinished;
-
-    public bool IsTieBreak => FirstPlayerScores.Games >= MinGamesToWin
-                           && SecondPlayerScores.Games >= MinGamesToWin;
 
     public bool IsSetFinished => IsTieBreak ? IsTieBreakFinished : IsRegularSetFinished;
 
@@ -52,41 +37,112 @@ public class MatchScoreDto
     {
         get
         {
-            var firstWinSetsCount = Enumerable.Zip(FirstPlayerScores.Sets, SecondPlayerScores.Sets)
-                                              .Count(x => x.First > x.Second);
-            var secondWinSetsCount = SecondPlayerScores.Sets.Count - firstWinSetsCount;
-            return firstWinSetsCount == MinSetsToWin || secondWinSetsCount == MinSetsToWin;
+            var setPairs = new List<(int First, int Second)>();
+
+            for (int i = 0; i < NumberOfSets; i++)
+            {
+                var setPair = _playersScores.Values.Select(ps => ps.Sets[i]).ToArray();
+                if (setPair is [var first, var second])
+                    setPairs.Add((first, second));
+            }
+
+            return setPairs.Count(sp => sp.First > sp.Second) >= MinSetsToWin
+                || setPairs.Count(sp => sp.First < sp.Second) >= MinSetsToWin; 
         }
     }
 
-    private bool IsRegularSetFinished => (FirstPlayerScores.Games >= MinGamesToWin
-                                      || SecondPlayerScores.Games >= MinGamesToWin)
-                                      && GamesDifference >= MinGamesDifferenceToWin;
+    public bool IsTieBreak => _playersScores.Values.All(ps => ps.Games >= MinGamesToWin);
 
-    private bool IsTieBreakFinished => (FirstPlayerScores.Points >= MinTieBreakPointsToWin
-                                    || SecondPlayerScores.Points >= MinTieBreakPointsToWin)
+    public bool IsAdvantage => !IsTieBreak
+                            && _playersScores.Values.Any(ps => ps.Points == MinPointsToWin)
+                            && PointsDifference == MinPointsDifferenceToWin - 1;
+
+    private bool IsTieBreakFinished => IfAnyPlayerPassedPointsThreshold(MinTieBreakPointsToWin)
                                     && PointsDifference >= MinPointsDifferenceToWin;
-    
-    private bool IsRegularGameFinished => (FirstPlayerScores.Points >= MinPointsToWin
-                                       || SecondPlayerScores.Points >= MinPointsToWin)
+
+    private bool IsRegularGameFinished => IfAnyPlayerPassedPointsThreshold(MinPointsToWin)
                                        && PointsDifference >= MinPointsDifferenceToWin;
 
-    private int PointsDifference => Math.Abs(FirstPlayerScores.Points - SecondPlayerScores.Points);
-    private int GamesDifference => Math.Abs(FirstPlayerScores.Games - SecondPlayerScores.Games);
+    private bool IsRegularSetFinished => IfAnyPlayerPassedGamesThreshold(MinGamesToWin)
+                                      && GamesDifference >= MinGamesDifferenceToWin;
+
+    private bool IfAnyPlayerPassedPointsThreshold(int threshold) =>
+        _playersScores.Values.Any(ps => ps.Points >= threshold);
+    
+    private bool IfAnyPlayerPassedGamesThreshold(int threshold) =>
+        _playersScores.Values.Any(ps => ps.Games >= threshold);
+
+    private int PointsDifference
+    {
+        get
+        {
+            var firstPlayerPoints = _playersScores[FirstPlayer.Id].Points;
+            var secondPlayerPoints = _playersScores[SecondPlayer.Id].Points;
+
+            return Math.Abs(firstPlayerPoints - secondPlayerPoints);
+        }
+    }
+
+    private int GamesDifference
+    {
+        get
+        {
+            var firstPlayerGames = _playersScores[FirstPlayer.Id].Games;
+            var secondPlayerGames = _playersScores[SecondPlayer.Id].Games;
+            
+            return Math.Abs(firstPlayerGames - secondPlayerGames);
+        }
+    }
 
     public void StartNewGame()
     {
-        FirstPlayerScores.ResetPoints();
-        SecondPlayerScores.ResetPoints();
+        foreach (var playerScores in _playersScores.Values)
+            playerScores.ResetPoints();
     }
 
     public void StartNewSet()
     {
-        FirstPlayerScores.ResetGames();
-        SecondPlayerScores.ResetGames();
+        foreach (var playerScores in _playersScores.Values)
+            playerScores.ResetGames();
     }
 
-    public string WinnerName => Match.WinnerId == Match.FirstPlayerId
-                                ? Match.FirstPlayer.Name
-                                : Match.SecondPlayer.Name;
+    public void AddPoint(int winnerId)
+    {
+        var loserId = winnerId == FirstPlayer.Id ? SecondPlayer.Id : FirstPlayer.Id;
+
+        if (IsAdvantage)
+            _playersScores[loserId].Points--;
+        else
+            _playersScores[winnerId].Points++;
+    }
+
+    public void AddGame(int winnerId) => _playersScores[winnerId].Games++;
+
+    public bool TryGetScoreComponent<T>(
+        int playerId, string componentName, out T? component, object?[]? parameters = null)
+    {
+        component = default;
+        if (!_playersScores.TryGetValue(playerId, out var playerScores))
+            return false;
+
+        var property = playerScores.GetType().GetProperty(componentName);
+        if (property != null)
+        {
+            component = (T?)property.GetValue(playerScores);
+            return true;
+        }
+
+        var method = playerScores.GetType().GetMethod(componentName);
+        component = (T?)method?.Invoke(playerScores, parameters);
+
+        return component != null;
+    }
+
+    public void SetScoreComponents<T>(T firstPlayerComponent, T secondPlayerComponent, string componentName)
+    {
+        var property = _playersScores[FirstPlayer.Id].GetType().GetProperty(componentName);
+
+        property?.SetValue(_playersScores[FirstPlayer.Id], firstPlayerComponent);
+        property?.SetValue(_playersScores[SecondPlayer.Id], secondPlayerComponent);
+    }
 }

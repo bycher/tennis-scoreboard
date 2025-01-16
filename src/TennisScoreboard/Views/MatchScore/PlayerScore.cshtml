@@ -1,0 +1,17 @@
+@model PlayerScoreViewModel
+
+<tr>
+    <td>@Model.Player.Name</td>
+    @if (!Model.MatchScore.IsMatchFinished)
+    {
+        <td>@Model.GetPointsAsString()</td>
+    }
+    @foreach (int set in Model.GetSets())
+    {
+        <td>@set</td>
+    }
+    @if (!Model.MatchScore.IsMatchFinished)
+    {
+        <td>@Model.GetGames()</td>
+    }
+</tr>

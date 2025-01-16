@@ -9,6 +9,8 @@ public class PlayersService(TennisMatchesContext context)
 {
     private readonly TennisMatchesContext _context = context;
 
+    public async Task<Player?> GetPlayerById(int playerId) => await _context.Players.FindAsync(playerId);
+
     public async Task<(Player, Player)> AddPlayers(string firstPlayerName, string secondPlayerName)
     {
         var firstPlayer = await AddPlayer(firstPlayerName);
