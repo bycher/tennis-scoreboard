@@ -1,13 +1,21 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using TennisScoreboard.Data;
-using TennisScoreboard.Models;
+using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Services;
 
 public class PlayersService(TennisMatchesContext context)
 {
     private readonly TennisMatchesContext _context = context;
+
+    public async Task<(Player, Player)> AddPlayers(string firstPlayerName, string secondPlayerName)
+    {
+        var firstPlayer = await AddPlayer(firstPlayerName);
+        var secondPlayer = await AddPlayer(secondPlayerName);
+
+        return (firstPlayer, secondPlayer);
+    }
 
     public async Task<Player> AddPlayer(string playerName)
     {

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TennisScoreboard.Models;
+using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Data;
 
@@ -25,5 +25,10 @@ public class TennisMatchesContext : DbContext
                     .HasOne(m => m.SecondPlayer)
                     .WithMany()
                     .HasForeignKey(m => m.SecondPlayerId);
+        
+        modelBuilder.Entity<Match>()
+                    .HasOne(m => m.Winner)
+                    .WithMany()
+                    .HasForeignKey(m => m.WinnerId);
     }
 }

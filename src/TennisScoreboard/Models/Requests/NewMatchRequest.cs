@@ -1,14 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TennisScoreboard.Models;
+namespace TennisScoreboard.Models.Requests;
 
-public class NewMatch : IValidatableObject
+public class NewMatchRequest : IValidatableObject
 {
     [Required(ErrorMessage="Missing player's name")]
-    public string? FirstPlayerName { get; set; }
+    public string FirstPlayerName { get; set; } = null!;
 
     [Required(ErrorMessage="Missing player's name")]
-    public string? SecondPlayerName { get; set; }
+    public string SecondPlayerName { get; set; } = null!;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

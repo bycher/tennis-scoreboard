@@ -1,49 +1,50 @@
-using TennisScoreboard.Models;
+using TennisScoreboard.Models.Dtos;
 
 namespace TennisScoreboard.Services;
 
 public class MatchScoreCalculationService
 {
-    public void UpdateMatchScore(MatchScore MatchScore, int winnerId)
+    public void UpdateMatchScore(MatchScoreUpdateContextDto context)
     {
-        UpdatePoints(MatchScore, winnerId);
+        UpdatePoints(context);
         
-        if (MatchScore.IsGameFinished)
+        if (context.MatchScore.IsGameFinished)
         {
-            UpdateGames(MatchScore, winnerId);
+            UpdateGames(context);
 
-            if (!MatchScore.IsMatchFinished)
+            if (!context.MatchScore.IsMatchFinished)
             {
-                if (MatchScore.IsSetFinished)
-                    MatchScore.StartNewSet();
-                MatchScore.StartNewGame();
+                if (context.MatchScore.IsSetFinished)
+                    context.MatchScore.StartNewSet();
+
+                context.MatchScore.StartNewGame();
             }
         }
     }
 
-    private static void UpdateGames(MatchScore MatchScore, int winnerId)
+    private static void UpdateGames(MatchScoreUpdateContextDto context)
     {
-        if (winnerId == MatchScore.Match.FirstPlayerId)
-            MatchScore.FirstPlayerScores.Games++;
+        if (context.WinnerId == context.MatchScore.Match.FirstPlayerId)
+            context.MatchScore.FirstPlayerScores.Games++;
         else
-            MatchScore.SecondPlayerScores.Games++;
+            context.MatchScore.SecondPlayerScores.Games++;
     }
 
-    private static void UpdatePoints(MatchScore MatchScore, int winnerId)
+    private static void UpdatePoints(MatchScoreUpdateContextDto context)
     {
-        if (winnerId == MatchScore.Match.FirstPlayerId)
+        if (context.WinnerId == context.MatchScore.Match.FirstPlayerId)
         {
-            if (MatchScore.IsAdvantage)
-                MatchScore.SecondPlayerScores.Points--;
+            if (context.MatchScore.IsAdvantage)
+                context.MatchScore.SecondPlayerScores.Points--;
             else
-                MatchScore.FirstPlayerScores.Points++;
+                context.MatchScore.FirstPlayerScores.Points++;
         }
         else
         {
-            if (MatchScore.IsAdvantage)
-                MatchScore.FirstPlayerScores.Points--;
+            if (context.MatchScore.IsAdvantage)
+                context.MatchScore.FirstPlayerScores.Points--;
             else
-                MatchScore.SecondPlayerScores.Points++;
+                context.MatchScore.SecondPlayerScores.Points++;
         }
     }
 }

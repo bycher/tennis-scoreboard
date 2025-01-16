@@ -1,30 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
-using TennisScoreboard.Data;
-using TennisScoreboard.Models;
+using TennisScoreboard.Models.Dtos;
+using TennisScoreboard.Models.Requests;
 using TennisScoreboard.Services;
 
 namespace TennisScoreboard.Controllers;
 
 [Route("new-match")]
 public class NewMatchController(
-    OngoingMatchesStorage ongoingMatchesStorage, PlayersService playersService) : Controller
+    OngoingMatchesService ongoingMatchesService, PlayersService playersService) : Controller
 {
     private readonly PlayersService _playersService = playersService;
-    private readonly OngoingMatchesStorage _ongoingMatchesStorage = ongoingMatchesStorage;
+    private readonly OngoingMatchesService _ongoingMatchesService = ongoingMatchesService;
 
-    public IActionResult Index() => View();
+    public IActionResult StartNewMatch() => View();
 
     [HttpPost]
-    public async Task<IActionResult> Index(NewMatch newMatch)
+    public async Task<IActionResult> StartNewMatch(NewMatchRequest request)
     {
         if (!ModelState.IsValid)
-            return View(newMatch);
+            return View(request);
 
-        var firstPlayer = await _playersService.AddPlayer(newMatch.FirstPlayerName!);
-        var secondPlayer = await _playersService.AddPlayer(newMatch.SecondPlayerName!);
+        var (firstPlayer, secondPlayer) = await _playersService.AddPlayers(
+            request.FirstPlayerName, request.SecondPlayerName);
+            
+        var matchScore = new MatchScoreDto(firstPlayer, secondPlayer);
+        var key = _ongoingMatchesService.Add(matchScore);
 
-        var key = _ongoingMatchesStorage.Add(firstPlayer, secondPlayer);
-
-        return Redirect($"/match-score?uuid={key}");
+        return RedirectToAction("GetMatchScore", "MatchScore", new { uuid = key });
     }
 }

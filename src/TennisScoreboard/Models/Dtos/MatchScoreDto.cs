@@ -1,6 +1,8 @@
-namespace TennisScoreboard.Models;
+using TennisScoreboard.Models.Entities;
 
-public class MatchScore
+namespace TennisScoreboard.Models.Dtos;
+
+public class MatchScoreDto
 {
     private const int MinPointsToWin = 4;
     private const int MinTieBreakPointsToWin = 7;
@@ -12,10 +14,10 @@ public class MatchScore
     private const int MinSetsToWin = 2;
 
     public Match Match { get; set; }
-    public Scores FirstPlayerScores { get; set; } = new();
-    public Scores SecondPlayerScores { get; set; } = new();
+    public PlayerScoresDto FirstPlayerScores { get; set; } = new();
+    public PlayerScoresDto SecondPlayerScores { get; set; } = new();
 
-    public MatchScore(Player firstPlayer, Player secondPlayer)
+    public MatchScoreDto(Player firstPlayer, Player secondPlayer)
     {
         Match = new Match
         {
@@ -26,7 +28,7 @@ public class MatchScore
         };
     }
 
-    public MatchScore(int firstPlayerId, int secondPlayerId)
+    public MatchScoreDto(int firstPlayerId, int secondPlayerId)
     {
         Match = new Match
         {

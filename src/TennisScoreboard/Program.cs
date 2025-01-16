@@ -11,9 +11,9 @@ connection.Open();
 builder.Services.AddDbContext<TennisMatchesContext>(options => options.UseSqlite(connection));
 
 builder.Services.AddScoped<DbInitializer>();
-builder.Services.AddSingleton<OngoingMatchesStorage>();
+builder.Services.AddSingleton<OngoingMatchesService>();
 builder.Services.AddScoped<MatchScoreCalculationService>();
-builder.Services.AddScoped<FinishedMatchesArchiveService>();
+builder.Services.AddScoped<MatchesHistoryService>();
 builder.Services.AddScoped<PlayersService>();
 
 builder.Services.AddControllersWithViews();

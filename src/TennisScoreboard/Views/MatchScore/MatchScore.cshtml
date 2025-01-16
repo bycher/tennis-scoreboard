@@ -20,7 +20,7 @@
 
         <div class="match-scoring-menu">
             <div class="match-scoring-title">Who won point?</div>
-            <form method="post" asp-route-uuid=@Model.Uuid class="match-scoring-form">
+            <form method="post" asp-action="UpdateMatchScore" asp-route-uuid=@Model.Uuid class="match-scoring-form">
                 <button type="submit" name="winnerId" value="@Model.MatchScore.Match.FirstPlayerId" class="submit-button first-player">
                     @Model.MatchScore.Match.FirstPlayer.Name
                 </button>

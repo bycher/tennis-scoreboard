@@ -1,11 +1,11 @@
-namespace TennisScoreboard.Models;
+namespace TennisScoreboard.Models.Dtos;
 
-public class MatchesHistoryRecord
+public class MatchesHistoryRecordDto
 {
     public string FirstPlayerName { get; set; } = null!;
     public string SecondPlayerName { get; set; } = null!;
     public string WinnerName { get; set; } = null!;
 
-    public bool IsFitUnderFilter(MatchesHistoryFilter filter) =>
+    public bool IsFitUnderFilter(MatchesHistoryFilterDto filter) =>
         filter.IsAppliedToPlayer(FirstPlayerName) || filter.IsAppliedToPlayer(SecondPlayerName);
 }

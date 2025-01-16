@@ -1,7 +1,7 @@
 @model MatchHistoryViewModel
 
 @{  
-    ViewData["Title"] = "History";
+    ViewData["Title"] = "Matches";
 }
 
 <form method="get" class="matches-filter-form">
@@ -40,8 +40,7 @@
     }
     @for (int page = 1; page <= Model.TotalPages; page++)
     {
-        <a asp-route-page=@(page) asp-route-filter_by_player_name=@Model.FilterByPlayerName
-           class=@Model.GetCssForPage(page)>@(page)</a>
+        <a asp-route-page=@(page) asp-route-filter_by_player_name=@Model.FilterByPlayerName>@(page)</a>
     }
     @if (Model.CurrentPage < Model.TotalPages)
     {   

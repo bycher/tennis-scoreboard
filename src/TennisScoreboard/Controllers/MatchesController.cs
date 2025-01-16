@@ -1,27 +1,29 @@
 using Microsoft.AspNetCore.Mvc;
-using TennisScoreboard.Data;
-using TennisScoreboard.Models;
+using TennisScoreboard.Models.Dtos;
+using TennisScoreboard.Models.Requests;
+using TennisScoreboard.Models.ViewModels;
 using TennisScoreboard.Services;
 
 namespace TennisScoreboard.Controllers;
 
 [Route("matches")]
-public class MatchesController(FinishedMatchesArchiveService finishedMatchesArchiveService) : Controller
+public class MatchesController(MatchesHistoryService matchesHistoryService) : Controller
 {
-    private readonly FinishedMatchesArchiveService _finishedMatchesArchiveService = finishedMatchesArchiveService;
+    private readonly MatchesHistoryService _matchesHistoryService = matchesHistoryService;
 
-    public async Task<IActionResult> Index(
-        int page = 1, 
-        [FromQuery(Name="filter_by_player_name")] string? filterByPlayerName = null)
+    public async Task<IActionResult> GetMatches(GetMatchesRequest request)
     {
-        var filteredMatchHistoryRecords = await _finishedMatchesArchiveService.GetFilteredMatchHistoryRecords(
-            filterByPlayerName);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var filter = new MatchesHistoryFilterDto(request.FilterByPlayerName);
+        var records = await _matchesHistoryService.GetFilteredHistory(filter);
 
         return View(new MatchHistoryViewModel
         {
-            Records = filteredMatchHistoryRecords,
-            CurrentPage = page,
-            FilterByPlayerName = filterByPlayerName
+            Records = records,
+            CurrentPage = request.Page,
+            FilterByPlayerName = request.FilterByPlayerName
         });
     }
 }

@@ -1,6 +1,6 @@
-namespace TennisScoreboard.Models;
+namespace TennisScoreboard.Models.Dtos;
 
-public class Scores
+public class PlayerScoresDto
 {
     public int Points { get; set; }
     public int Games { get; set; }

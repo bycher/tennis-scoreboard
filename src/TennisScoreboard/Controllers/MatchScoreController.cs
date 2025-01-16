@@ -1,44 +1,59 @@
 using Microsoft.AspNetCore.Mvc;
-using TennisScoreboard.Data;
-using TennisScoreboard.Models;
+using TennisScoreboard.Models.Dtos;
+using TennisScoreboard.Models.Requests;
+using TennisScoreboard.Models.ViewModels;
 using TennisScoreboard.Services;
+using TennisScoreboard.Utils;
 
 namespace TennisScoreboard.Controllers;
 
 [Route("match-score")]
 public class MatchScoreController(
-    OngoingMatchesStorage ongoingMatchesStorage,
+    OngoingMatchesService ongoingMatchesService,
     MatchScoreCalculationService matchScoreCalculationService,
-    FinishedMatchesArchiveService finishedMatchesArchiveService) : Controller
+    MatchesHistoryService matchesHistoryService) : Controller
 {
-    private readonly OngoingMatchesStorage _ongoingMatchesStorage = ongoingMatchesStorage;
+    private readonly OngoingMatchesService _ongoingMatchesService = ongoingMatchesService;
     private readonly MatchScoreCalculationService _matchScoreCalculationService = matchScoreCalculationService;
-    private readonly FinishedMatchesArchiveService _finishedMatchesArchiveService = finishedMatchesArchiveService;
+    private readonly MatchesHistoryService _matchesHistoryService = matchesHistoryService;
 
-    public IActionResult Index(Guid uuid)
+    private static string MatchNotFoundMessage(Guid uuid) => string.Format($"Match '{uuid}' was not found");
+    private const string MatchScoreViewName = "MatchScore";
+
+    public IActionResult GetMatchScore([ValidGuid] Guid uuid)
     {
-        var match = _ongoingMatchesStorage.Get(uuid);
-        if (match == null)
-            return NotFound(new { message = $"Match witch guid {uuid} was not found"});
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        return View(new MatchScoreViewModel(match, uuid));
+        var matchScore = _ongoingMatchesService.Get(uuid);
+        if (matchScore is null)
+            return NotFound(new { message = MatchNotFoundMessage(uuid) });
+
+        return View(MatchScoreViewName, new MatchScoreViewModel(matchScore, uuid));
     }
 
     [HttpPost]
-    public async Task<IActionResult> Index(Guid uuid, int winnerId)
+    public async Task<IActionResult> UpdateMatchScore(UpdateMatchScoreRequest request)
     {
-        var match = _ongoingMatchesStorage.Get(uuid);
-        if (match == null)
-            return NotFound(new { message = $"Match '{uuid}' was not found"});
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+            
+        var matchScore = _ongoingMatchesService.Get(request.Uuid);
+        if (matchScore is null)
+            return NotFound(new { message = MatchNotFoundMessage(request.Uuid) });
         
-        _matchScoreCalculationService.UpdateMatchScore(match, winnerId);
-        if (match.IsMatchFinished)
+        var context = new MatchScoreUpdateContextDto(matchScore, request.WinnerId);
+        if (!context.IsValid)
+            return BadRequest(new { message = "Winner ID must be equal to one of player's ID" });
+
+        _matchScoreCalculationService.UpdateMatchScore(context);
+
+        if (matchScore.IsMatchFinished)
         {
-            await _finishedMatchesArchiveService.ArchiveMatch(match.Match, winnerId);
-            if (!_ongoingMatchesStorage.Remove(uuid))
-                return StatusCode(500, new { message = $"Failed to remove match '{uuid}' from storage" });
+            await _matchesHistoryService.AddToHistory(context);
+            _ongoingMatchesService.Remove(request.Uuid);
         }
 
-        return View(new MatchScoreViewModel(match, uuid));
+        return View(MatchScoreViewName, new MatchScoreViewModel(matchScore, request.Uuid));
     }
 }

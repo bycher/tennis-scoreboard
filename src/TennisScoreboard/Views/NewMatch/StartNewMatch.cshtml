@@ -1,10 +1,10 @@
-@model NewMatch
+@model NewMatchRequest
 
 @{
     ViewData["Title"] = "New match";
 }
 
-<form method="post" class="new-match-form">
+<form asp-action="StartNewMatch" method="post" class="new-match-form">
     <div class="player-input">
         <label asp-for="FirstPlayerName">First player</label>
         <div class="input-container">

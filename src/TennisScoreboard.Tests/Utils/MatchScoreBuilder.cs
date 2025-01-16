@@ -1,12 +1,14 @@
-namespace TennisScoreboard.Models;
+using TennisScoreboard.Models.Dtos;
+
+namespace TennisScoreboard.Tests.Utils;
 
 public class MatchScoreBuilder(int firstPlayerId, int secondPlayerId)
 {
-    private readonly MatchScore _MatchScore = new(firstPlayerId, secondPlayerId);
+    private readonly MatchScoreDto _MatchScore = new(firstPlayerId, secondPlayerId);
 
     public MatchScoreBuilder WithPoints(string pointsString)
     {
-        var points = pointsString.Split(':').Select(Scores.PointsAsInt).ToList();
+        var points = pointsString.Split(':').Select(PlayerScoresDto.PointsAsInt).ToList();
 
         _MatchScore.FirstPlayerScores.Points = points[0];
         _MatchScore.SecondPlayerScores.Points = points[1];
@@ -38,12 +40,12 @@ public class MatchScoreBuilder(int firstPlayerId, int secondPlayerId)
     {
         var firstPlayerSets = Sets.Select(set => set.Item1).ToList();
         var secondPlayerSets = Sets.Select(set => set.Item2).ToList();
-        
+
         _MatchScore.FirstPlayerScores.Sets = firstPlayerSets;
         _MatchScore.SecondPlayerScores.Sets = secondPlayerSets;
 
         return this;
     }
 
-    public MatchScore Build() => _MatchScore;
+    public MatchScoreDto Build() => _MatchScore;
 }

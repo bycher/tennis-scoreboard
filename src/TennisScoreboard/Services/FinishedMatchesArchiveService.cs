@@ -1,36 +1,34 @@
 using Microsoft.EntityFrameworkCore;
 using TennisScoreboard.Data;
-using TennisScoreboard.Models;
+using TennisScoreboard.Models.Dtos;
+using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Services;
 
-public class FinishedMatchesArchiveService(TennisMatchesContext context)
+public class MatchesHistoryService(TennisMatchesContext context)
 {
     private readonly TennisMatchesContext _context = context;
 
-    public async Task ArchiveMatch(Match match, int winnerId)
+    public async Task AddToHistory(MatchScoreUpdateContextDto context)
     {
         var matchToAdd = new Match
         {
-            FirstPlayerId = match.FirstPlayerId,
-            SecondPlayerId = match.SecondPlayerId,
-            WinnerId = winnerId
+            FirstPlayerId = context.MatchScore.Match.FirstPlayerId,
+            SecondPlayerId = context.MatchScore.Match.SecondPlayerId,
+            WinnerId = context.WinnerId
         };
         
         await _context.Matches.AddAsync(matchToAdd);
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<MatchesHistoryRecord>> GetFilteredMatchHistoryRecords(string? filterByPlayerName)
+    public async Task<IEnumerable<MatchesHistoryRecordDto>> GetFilteredHistory(MatchesHistoryFilterDto filter)
     {
         var matches = await _context.Matches
-            .Include(m => m.FirstPlayer)
-            .Include(m => m.SecondPlayer)
-            .Include(m => m.Winner)
+            .Include(m => m.FirstPlayer).Include(m => m.SecondPlayer).Include(m => m.Winner)
             .ToListAsync();
-        var filter = new MatchesHistoryFilter(filterByPlayerName);
 
-        return matches.Select(m => new MatchesHistoryRecord
+        return matches.Select(m => new MatchesHistoryRecordDto
             {
                 FirstPlayerName = m.FirstPlayer.Name,
                 SecondPlayerName = m.SecondPlayer.Name,

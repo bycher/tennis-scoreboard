@@ -1,4 +1,4 @@
-namespace TennisScoreboard.Models;
+namespace TennisScoreboard.Models.Entities;
 
 public class Match
 {
@@ -21,6 +21,6 @@ public class Match
 
         return base.Equals(obj);
     }
-    
+
     public override int GetHashCode() => HashCode.Combine(Id, FirstPlayerId, SecondPlayerId, WinnerId);
 }

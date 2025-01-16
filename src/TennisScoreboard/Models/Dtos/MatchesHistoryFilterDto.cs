@@ -1,6 +1,6 @@
-namespace TennisScoreboard.Models;
+namespace TennisScoreboard.Models.Dtos;
 
-public class MatchesHistoryFilter(string? playerName)
+public class MatchesHistoryFilterDto(string? playerName)
 {
     public string? PlayerName { get; set; } = playerName;
 

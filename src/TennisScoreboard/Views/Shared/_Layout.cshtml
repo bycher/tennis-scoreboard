@@ -13,9 +13,9 @@
 <body>
     <nav>
         <ul>
-            <li><a asp-controller="Home">Home</a></li>
-            <li><a asp-controller="NewMatch">New match</a></li>
-            <li><a asp-controller="Matches">Matches</a></li>
+            <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li><a asp-controller="NewMatch" asp-action="StartNewMatch">New match</a></li>
+            <li><a asp-controller="Matches" asp-action="GetMatches">Matches</a></li>
         </ul>
     </nav>
     @if (ViewData["Title"]?.ToString() != "Home")
