@@ -7,8 +7,7 @@ public class OngoingMatchesService {
 
     public MatchScoreDto? Get(Guid key) => _storage.GetValueOrDefault(key);
 
-    public Guid Add(MatchScoreDto match)
-    {
+    public Guid Add(MatchScoreDto match) {
         var key = Guid.NewGuid();
         _storage.Add(key, match);
         return key;

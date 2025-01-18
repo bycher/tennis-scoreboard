@@ -2,16 +2,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TennisScoreboard.Models.Requests;
 
-public class NewMatchRequest : IValidatableObject
-{
-    [Required(ErrorMessage="Missing player's name")]
-    public string FirstPlayerName { get; set; } = null!;
+public class NewMatchRequest : IValidatableObject {
+    private const string MissingNameMessage = "Missing player's name";
 
-    [Required(ErrorMessage="Missing player's name")]
-    public string SecondPlayerName { get; set; } = null!;
+    [Required(ErrorMessage = MissingNameMessage)]
+    public required string FirstPlayerName { get; set; }
 
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
+    [Required(ErrorMessage = MissingNameMessage)]
+    public required string SecondPlayerName { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
         if (FirstPlayerName == SecondPlayerName)
             yield return new ValidationResult("Player's names must be different");
     }

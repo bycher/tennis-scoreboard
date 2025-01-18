@@ -1,35 +1,32 @@
 @model MatchScoreViewModel
 
+@{
+    var matchScore = Model.MatchScore;
+}
+
 <table class="match-score-table">    
     <thead>
         <tr>
             <th>Player</th>
-            @if (!Model.MatchScore.IsMatchFinished)
-            {
+            @if (!matchScore.IsMatchFinished) {
                 <th>Game</th>
             }
-            @for (int set = 1; set <= Model.MatchScore.NumberOfSets; set++)
-            {
+            @for (int set = 1; set <= matchScore.NumberOfSets; set++) {
                 <th>Set @set</th>
             }
-            @if (!Model.MatchScore.IsMatchFinished)
-            {
-                <th>Set @(Model.MatchScore.NumberOfSets + 1)</th>
+            @if (!matchScore.IsMatchFinished) {
+                <th>Set @(matchScore.NumberOfSets + 1)</th>
             }
         </tr>
     </thead>
     <tbody>
         @{
-            await Html.RenderPartialAsync("PlayerScore", new PlayerScoreViewModel
-            {
-                MatchScore = Model.MatchScore,
-                Player = Model.MatchScore.FirstPlayer
-            });
-            await Html.RenderPartialAsync("PlayerScore", new PlayerScoreViewModel
-            {
-                MatchScore = Model.MatchScore,
-                Player = Model.MatchScore.SecondPlayer
-            });
+            await Html.RenderPartialAsync(
+                "PlayerScore", new PlayerScoreViewModel(matchScore, matchScore.FirstPlayer)
+            );
+            await Html.RenderPartialAsync(
+                "PlayerScore", new PlayerScoreViewModel(matchScore, matchScore.SecondPlayer)
+            );
         }
     </tbody>
 </table>

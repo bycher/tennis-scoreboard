@@ -5,34 +5,27 @@ using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Services;
 
-public class PlayersService(TennisMatchesContext context)
-{
-    private readonly TennisMatchesContext _context = context;
+public class PlayersService(TennisMatchesContext context) {
+    public async Task<Player?> GetPlayerById(int playerId) => await context.Players.FindAsync(playerId);
 
-    public async Task<Player?> GetPlayerById(int playerId) => await _context.Players.FindAsync(playerId);
-
-    public async Task<(Player, Player)> AddPlayers(string firstPlayerName, string secondPlayerName)
-    {
+    public async Task<(Player, Player)> AddPlayers(string firstPlayerName, string secondPlayerName) {
         var firstPlayer = await AddPlayer(firstPlayerName);
         var secondPlayer = await AddPlayer(secondPlayerName);
 
         return (firstPlayer, secondPlayer);
     }
 
-    public async Task<Player> AddPlayer(string playerName)
-    {
+    public async Task<Player> AddPlayer(string playerName) {
         var player = new Player { Name = playerName };
 
-        try
-        {
-            var playerEntry = await _context.Players.AddAsync(player);
-            await _context.SaveChangesAsync();
+        try {
+            var playerEntry = await context.Players.AddAsync(player);
+            await context.SaveChangesAsync();
             return playerEntry.Entity;
         }
-        catch (DbUpdateException ex) when (IsUniqueConstraintVioldated(ex))
-        {
-            _context.Entry(player).State = EntityState.Detached;
-            return await _context.Players.SingleAsync(p => p.Name == playerName);
+        catch (DbUpdateException ex) when (IsUniqueConstraintVioldated(ex)) {
+            context.Entry(player).State = EntityState.Detached;
+            return await context.Players.SingleAsync(p => p.Name == playerName);
         }
     }
 

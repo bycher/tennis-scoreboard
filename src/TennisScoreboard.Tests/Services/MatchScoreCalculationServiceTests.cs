@@ -5,8 +5,7 @@ using TennisScoreboard.Tests.Utils;
 namespace TennisScoreboard.Tests.Services;
 
 [TestFixture]
-public class MatchScoreCalculationServiceTests
-{
+public class MatchScoreCalculationServiceTests {
     private int _firstPlayerId;
     private int _secondPlayerId;
 
@@ -15,8 +14,7 @@ public class MatchScoreCalculationServiceTests
     private MatchScoreDto _matchScore = null!;
 
     [SetUp]
-    public void SetUp()
-    {
+    public void SetUp() {
         _firstPlayerId = 1;
         _secondPlayerId = 2;
 
@@ -25,8 +23,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsPoint_ShouldIncrementPoints()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsPoint_ShouldIncrementPoints() {
         // Arrange
         _matchScore = _builder.WithPoints("0", "0").Build();
         
@@ -38,8 +35,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerLosePoint_ShouldNotIncrementPoints()
-    {
+    public void UpdateMatchScore_WhenPlayerLosePoint_ShouldNotIncrementPoints() {
         // Arrange
         _matchScore = _builder.WithPoints("0", "0").Build();
         
@@ -51,8 +47,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsGameStandard_ShouldIncrementGames()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsGameStandard_ShouldIncrementGames() {
         // Arrange
         _matchScore = _builder.WithPoints("40", "0").Build();
 
@@ -64,8 +59,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsGame_ShouldResetPoints()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsGame_ShouldResetPoints() {
         // Arrange
         _matchScore = _builder.WithPoints("40", "0").Build();
         
@@ -73,16 +67,14 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertPointsEqualTo(_firstPlayerId, 0);
             AssertPointsEqualTo(_secondPlayerId, 0);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenDeuceIsAchieved_GameShouldBeContinued()
-    {
+    public void UpdateMatchScore_WhenDeuceIsAchieved_GameShouldBeContinued() {
         // Arrange
         _matchScore = _builder.WithPoints("40", "40").Build();
         
@@ -90,16 +82,14 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertGamesEqualTo(_firstPlayerId, 0);
             AssertGamesEqualTo(_secondPlayerId, 0);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsFromAdvantage_ShouldIncrementGames()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsFromAdvantage_ShouldIncrementGames() {
         // Arrange
         _matchScore = _builder.WithPoints("AD", "40").Build();
         
@@ -107,16 +97,14 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertGamesEqualTo(_firstPlayerId, 1);
             AssertGamesEqualTo(_secondPlayerId, 0);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenLoserRecoupsAdvantage_GameShouldBeContinued()
-    {
+    public void UpdateMatchScore_WhenLoserRecoupsAdvantage_GameShouldBeContinued() {
         // Arrange
         _matchScore = _builder.WithPoints("AD", "40").Build();
         
@@ -124,35 +112,31 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_secondPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertGamesEqualTo(_firstPlayerId, 0);
             AssertGamesEqualTo(_secondPlayerId, 0);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenLoserRecoupsAdvantage_WinnerShouldLosePoint()
-    {
+    public void UpdateMatchScore_WhenLoserRecoupsAdvantage_WinnerShouldLosePoint() {
         // Arrange
         _matchScore = _builder.WithPoints("AD", "40").Build();
-        _matchScore.TryGetScoreComponent(_firstPlayerId, nameof(PlayerScoresDto.Points), out int? winnerPoints);
-        _matchScore.TryGetScoreComponent(_secondPlayerId, nameof(PlayerScoresDto.Points), out int? loserPoints);
+        _matchScore.TryGetScoreComponent(nameof(PlayerScoresDto.Points), _firstPlayerId, out int? winnerPoints);
+        _matchScore.TryGetScoreComponent(nameof(PlayerScoresDto.Points), _secondPlayerId, out int? loserPoints);
 
         // Act
         UpdateScore(_secondPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertPointsEqualTo(_firstPlayerId, winnerPoints - 1);
             AssertPointsEqualTo(_secondPlayerId, loserPoints);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsSixGamesWithAtLeastTwoGamesLead_ShouldUpdateSets()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsSixGamesWithAtLeastTwoGamesLead_ShouldUpdateSets() {
         // Arrange
         _matchScore = _builder.WithGames(5, 4)
                               .WithPoints("40", "0")
@@ -162,16 +146,14 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, [6]);
             AssertSetsEqualTo(_secondPlayerId, [4]);
         });
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsSevenGamesWithoutTieBreak_ShouldUpdateSets()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsSevenGamesWithoutTieBreak_ShouldUpdateSets() {
         // Arrange
         _matchScore = _builder.WithGames(6, 5)
                               .WithPoints("40", "0")
@@ -181,8 +163,7 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, [7]);
             AssertSetsEqualTo(_secondPlayerId, [5]);
         });
@@ -202,8 +183,7 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_secondPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, []);
             AssertSetsEqualTo(_secondPlayerId, []);
             Assert.That(_matchScore.IsTieBreak, Is.True);
@@ -211,8 +191,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenTieBreak_And_PlayerGetsSevenPointsWithTwoPointsLead_ShouldUpdateSets()
-    {
+    public void UpdateMatchScore_WhenTieBreak_And_PlayerGetsSevenPointsWithTwoPointsLead_ShouldUpdateSets() {
         // Arrange
         _matchScore = _builder.WithTieBreak(6, 5).Build();
         
@@ -220,8 +199,7 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, [7]);
             AssertSetsEqualTo(_secondPlayerId, [6]);
         });
@@ -236,8 +214,7 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
         
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, []);
             AssertSetsEqualTo(_secondPlayerId, []);
             Assert.That(_matchScore.IsSetFinished, Is.False);
@@ -245,8 +222,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsTwoOutOfTwoSets_MatchShouldBeEnded()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsTwoOutOfTwoSets_MatchShouldBeEnded() {
         // Arrange
         _matchScore = _builder.WithSets([(6, 4)])
                               .WithGames(5, 4)
@@ -257,8 +233,7 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, [6, 6]);
             AssertSetsEqualTo(_secondPlayerId, [4, 4]);
             Assert.That(_matchScore.IsMatchFinished, Is.True);
@@ -266,8 +241,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenPlayerWinsTwoOutOfThreeSets_MatchShouldBeEnded()
-    {
+    public void UpdateMatchScore_WhenPlayerWinsTwoOutOfThreeSets_MatchShouldBeEnded() {
         // Arrange
         _matchScore = _builder.WithSets([(6, 4), (4, 6)])
                               .WithGames(5, 4)
@@ -278,8 +252,7 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_firstPlayerId);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, [6, 4, 6]);
             AssertSetsEqualTo(_secondPlayerId, [4, 6, 4]);
             Assert.That(_matchScore.IsMatchFinished, Is.True);
@@ -287,8 +260,7 @@ public class MatchScoreCalculationServiceTests
     }
 
     [Test]
-    public void UpdateMatchScore_WhenBothPlayersWinSet_MatchShouldBeContinued()
-    {
+    public void UpdateMatchScore_WhenBothPlayersWinSet_MatchShouldBeContinued() {
         // Arrange
         _matchScore = _builder.WithSets([(6, 4)])
                               .WithGames(4, 5)
@@ -299,47 +271,33 @@ public class MatchScoreCalculationServiceTests
         UpdateScore(_secondPlayerId);
 
         // Assert
-        Assert.Multiple(() =>
-        {
+        Assert.Multiple(() => {
             AssertSetsEqualTo(_firstPlayerId, [6, 4]);
             AssertSetsEqualTo(_secondPlayerId, [4, 6]);
             Assert.That(_matchScore.IsMatchFinished, Is.False);
         });
     }
 
-    private void UpdateScore(int winnerId)
-    {
+    private void UpdateScore(int winnerId) {
         var context = new MatchScoreUpdateContextDto(_matchScore, winnerId);
         _service.UpdateMatchScore(context);
     }
 
     private void AssertPointsEqualTo(int playerId, int? expectedPoints) =>
-        Assert.Multiple(() =>
-        {
-            Assert.That(
-                _matchScore.TryGetScoreComponent(playerId, nameof(PlayerScoresDto.Points), out int? newPoints),
-                Is.True
-            );
-            Assert.That(newPoints, Is.EqualTo(expectedPoints));
-        });
+        AssertComponentEqualTo(nameof(PlayerScoresDto.Points), playerId, expectedPoints);
     
     private void AssertGamesEqualTo(int playerId, int? expectedGames) =>
-        Assert.Multiple(() =>
-        {
-            Assert.That(
-                _matchScore.TryGetScoreComponent(playerId, nameof(PlayerScoresDto.Games), out int? newGames),
-                Is.True
-            );
-            Assert.That(newGames, Is.EqualTo(expectedGames));
-        });
+        AssertComponentEqualTo(nameof(PlayerScoresDto.Games), playerId, expectedGames);
     
     private void AssertSetsEqualTo(int playerId, List<int>? expectedSets) =>
-        Assert.Multiple(() =>
-        {
+        AssertComponentEqualTo(nameof(PlayerScoresDto.Sets), playerId, expectedSets);
+
+    private void AssertComponentEqualTo<T>(string componentName, int playerId, T? expectedComponent) =>
+        Assert.Multiple(() => {
             Assert.That(
-                _matchScore.TryGetScoreComponent(playerId, nameof(PlayerScoresDto.Sets), out List<int>? newSets),
+                _matchScore.TryGetScoreComponent(componentName, playerId, out T? component),
                 Is.True
             );
-            Assert.That(newSets, Is.EqualTo(expectedSets));
+            Assert.That(component, Is.EqualTo(expectedComponent));
         });
 }

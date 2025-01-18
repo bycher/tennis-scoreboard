@@ -3,19 +3,16 @@ using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Data;
 
-public class TennisMatchesContext : DbContext
-{
+public class TennisMatchesContext : DbContext {
     public DbSet<Player> Players { get; set; } = null!;
     public DbSet<Match> Matches { get; set; } = null!;
 
-    public TennisMatchesContext(DbContextOptions<TennisMatchesContext> options) : base(options)
-    {
+    public TennisMatchesContext(DbContextOptions<TennisMatchesContext> options) : base(options) {
         Database.OpenConnection();
         Database.EnsureCreated();
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
+    protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.Entity<Match>()
                     .HasOne(m => m.FirstPlayer)
                     .WithMany()

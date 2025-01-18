@@ -7,23 +7,14 @@ using TennisScoreboard.Services;
 namespace TennisScoreboard.Controllers;
 
 [Route("matches")]
-public class MatchesController(MatchesHistoryService matchesHistoryService) : Controller
-{
-    private readonly MatchesHistoryService _matchesHistoryService = matchesHistoryService;
-
-    public async Task<IActionResult> GetMatches(GetMatchesRequest request)
-    {
+public class MatchesController(MatchesHistoryService matchesHistoryService) : Controller {
+    public async Task<IActionResult> GetMatches(GetMatchesRequest request) {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var filter = new MatchesHistoryFilterDto(request.FilterByPlayerName);
-        var records = await _matchesHistoryService.GetFilteredHistory(filter);
+        var records = await matchesHistoryService.GetFilteredHistory(filter);
 
-        return View(new MatchHistoryViewModel
-        {
-            Records = records,
-            CurrentPage = request.Page,
-            FilterByPlayerName = request.FilterByPlayerName
-        });
+        return View(new MatchHistoryViewModel(records, request.Page, request.FilterByPlayerName));
     }
 }

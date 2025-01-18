@@ -5,8 +5,8 @@ using TennisScoreboard.Services;
 namespace TennisScoreboard.Data;
 
 public class DbInitializer(
-    TennisMatchesContext context, MatchesHistoryService matchesHistoryService, PlayersService playersService)
-{
+    TennisMatchesContext context, MatchesHistoryService matchesHistoryService, PlayersService playersService
+) {
     private readonly List<string> _playerNames = [
         "Roger Federer",
         "Rafael Nadal",
@@ -19,35 +19,29 @@ public class DbInitializer(
         "Stefanos Tsitsipas",
         "Daniil Medvedev"
     ];
+
     private readonly Random _rand = new();
 
-    private readonly TennisMatchesContext _context = context;
-    private readonly MatchesHistoryService _matchesHistoryService = matchesHistoryService;
-    private readonly PlayersService _playersService = playersService;
-
-    public async Task InitializeAsync()
-    {
-        await _context.Database.EnsureCreatedAsync();        
+    public async Task InitializeAsync() {
+        await context.Database.EnsureCreatedAsync();        
 
         var players = await InitializePlayers();
-        await InitializeMatches(players.ToList());
+        await InitializeMatches(players);
     }
 
     private async Task<IEnumerable<Player>> InitializePlayers() =>
-        await Task.WhenAll(_playerNames.Select(async pn => await _playersService.AddPlayer(pn)));
+        await Task.WhenAll(_playerNames.Select(async pn => await playersService.AddPlayer(pn)));
 
-    private async Task InitializeMatches(List<Player> players)
-    {
-        // Seed with all pairs of players from _players and random winner
-        for (int i = 0; i < players.Count; i++)
-        {
-            for (int j = i + 1; j < players.Count; j++)
-            {   
-                var matchScore = new MatchScoreDto(players[i], players[j]);
-                var winnerId = GetRandomWinnerId(players[i], players[j]);
-                var context = new MatchScoreUpdateContextDto(matchScore, winnerId);
+    private async Task InitializeMatches(IEnumerable<Player> players) {
+        var playersList = players.ToList();
+
+        for (int i = 0; i < playersList.Count; i++) {
+            for (int j = i+1; j < playersList.Count; j++) {   
+                var matchScore = new MatchScoreDto(playersList[i], playersList[j]);
+                var winnerId = GetRandomWinnerId(playersList[i], playersList[j]);
                 
-                await _matchesHistoryService.AddToHistory(context);
+                var context = new MatchScoreUpdateContextDto(matchScore, winnerId);
+                await matchesHistoryService.AddToHistory(context);
             }
         }
     }

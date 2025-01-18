@@ -6,15 +6,12 @@
 }
 
 <div class="match-score">
-    @if (Model.MatchScore.IsMatchFinished)
-    {
+    @if (Model.MatchScore.IsMatchFinished) {
         <div class="finished-match-text-container">
             <div class="finished-match-main-text">Match is finished!</div>
             <div class="finished-match-support-text">Winner is <b>@Model.WinnerName</b></div>
         </div>  
-    }
-    else
-    {
+    } else {
         <div class="match-scoring-menu">
             <div class="match-scoring-title">Who won point?</div>
             <form method="post" asp-action="UpdateMatchScore" asp-route-uuid=@Model.Uuid class="match-scoring-form">

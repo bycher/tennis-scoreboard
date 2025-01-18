@@ -18,8 +18,7 @@
             <li><a asp-controller="Matches" asp-action="GetMatches">Matches</a></li>
         </ul>
     </nav>
-    @if (ViewData["Title"]?.ToString() != "Home")
-    {
+    @if (ViewData["Title"]?.ToString() != "Home") {
         <h2>@ViewData["Title"]</h2>
     }
     <div>

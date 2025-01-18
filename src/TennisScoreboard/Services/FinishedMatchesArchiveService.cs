@@ -5,31 +5,27 @@ using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Services;
 
-public class MatchesHistoryService(TennisMatchesContext context)
-{
-    private readonly TennisMatchesContext _context = context;
-
-    public async Task AddToHistory(MatchScoreUpdateContextDto context)
-    {
-        var matchToAdd = new Match
-        {
-            FirstPlayerId = context.MatchScore.FirstPlayer.Id,
-            SecondPlayerId = context.MatchScore.SecondPlayer.Id,
-            WinnerId = context.WinnerId
+public class MatchesHistoryService(TennisMatchesContext dbContext) {
+    public async Task AddToHistory(MatchScoreUpdateContextDto scoreContext) {
+        var matchToAdd = new Match {
+            FirstPlayerId = scoreContext.MatchScore.FirstPlayer.Id,
+            SecondPlayerId = scoreContext.MatchScore.SecondPlayer.Id,
+            WinnerId = scoreContext.WinnerId
         };
         
-        await _context.Matches.AddAsync(matchToAdd);
-        await _context.SaveChangesAsync();
+        await dbContext.Matches.AddAsync(matchToAdd);
+        await dbContext.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<MatchesHistoryRecordDto>> GetFilteredHistory(MatchesHistoryFilterDto filter)
-    {
-        var matches = await _context.Matches
-            .Include(m => m.FirstPlayer).Include(m => m.SecondPlayer).Include(m => m.Winner)
-            .ToListAsync();
+    public async Task<IEnumerable<MatchesHistoryRecordDto>> GetFilteredHistory(
+        MatchesHistoryFilterDto filter
+    ) {
+        var matches = await dbContext.Matches.Include(m => m.FirstPlayer)
+                                             .Include(m => m.SecondPlayer)
+                                             .Include(m => m.Winner)
+                                             .ToListAsync();
 
-        return matches.Select(m => new MatchesHistoryRecordDto
-            {
+        return matches.Select(m => new MatchesHistoryRecordDto {
                 FirstPlayerName = m.FirstPlayer.Name,
                 SecondPlayerName = m.SecondPlayer.Name,
                 WinnerName = m.Winner.Name

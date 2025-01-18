@@ -9,7 +9,6 @@ var connection = new SqliteConnection(builder.Configuration.GetConnectionString(
 connection.Open();
 
 builder.Services.AddDbContext<TennisMatchesContext>(options => options.UseSqlite(connection));
-
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddSingleton<OngoingMatchesService>();
 builder.Services.AddScoped<MatchScoreCalculationService>();
@@ -22,15 +21,13 @@ var app = builder.Build();
 
 app.Lifetime.ApplicationStopping.Register(connection.Close);
 
-using (var scope = app.Services.CreateScope())
-{
+using (var scope = app.Services.CreateScope()) {
     var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
     await initializer.InitializeAsync();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 app.MapControllerRoute("default", "{controller=Home}/{action=Index}");
 

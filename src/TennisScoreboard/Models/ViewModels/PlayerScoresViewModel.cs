@@ -3,31 +3,23 @@ using TennisScoreboard.Models.Entities;
 
 namespace TennisScoreboard.Models.ViewModels;
 
-public class PlayerScoreViewModel
-{
-    public required MatchScoreDto MatchScore { get; set; }
-    public required Player Player { get; set; }
+public class PlayerScoreViewModel(MatchScoreDto matchScore, Player player) {
+    public MatchScoreDto MatchScore { get; set; } = matchScore;
+    public Player Player { get; set; } = player;
 
-    public string GetPointsAsString()
-    {
-        MatchScore.TryGetScoreComponent(
-                Player.Id,
-                nameof(PlayerScoresDto.PointsAsString),
-                out string? pointsAsString,
-                [MatchScore.IsTieBreak]);
+    public string GetPointsAsString() => GetComponent<string>(
+        nameof(PlayerScoresDto.PointsAsString), [MatchScore.IsTieBreak]
+    );
 
-        return pointsAsString ?? throw new InvalidOperationException("Can't get points for player");
+    public int GetGames() => GetComponent<int>(nameof(PlayerScoresDto.Games));
+
+    public List<int> GetSets() => GetComponent<List<int>>(nameof(PlayerScoresDto.Sets));
+
+    private T GetComponent<T>(string componentName, object?[]? parameters = null) {
+        MatchScore.TryGetScoreComponent(componentName, Player.Id, out T? component, parameters);
+        return component ?? throw new InvalidOperationException(GetScoreComponentFailedMessage(componentName));
     }
 
-    public int GetGames()
-    {
-        MatchScore.TryGetScoreComponent(Player.Id, nameof(PlayerScoresDto.Games), out int? games);
-        return games ?? throw new InvalidOperationException("Can't get games for player");
-    }
-
-    public List<int> GetSets()
-    {
-        MatchScore.TryGetScoreComponent(Player.Id, nameof(PlayerScoresDto.Sets), out List<int>? sets);
-        return sets ?? throw new InvalidOperationException("Can't get sets for player");
-    }
+    private static string GetScoreComponentFailedMessage(string componentName) =>
+        $"Failed to get '{componentName}' for player";
 }

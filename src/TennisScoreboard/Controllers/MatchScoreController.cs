@@ -11,38 +11,28 @@ namespace TennisScoreboard.Controllers;
 public class MatchScoreController(
     OngoingMatchesService ongoingMatchesService,
     MatchScoreCalculationService matchScoreCalculationService,
-    MatchesHistoryService matchesHistoryService) : Controller
-{
-    private readonly OngoingMatchesService _ongoingMatchesService = ongoingMatchesService;
-    private readonly MatchScoreCalculationService _matchScoreCalculationService = matchScoreCalculationService;
-    private readonly MatchesHistoryService _matchesHistoryService = matchesHistoryService;
-
-    private static string MatchNotFoundMessage(Guid uuid) => string.Format($"Match '{uuid}' was not found");
+    MatchesHistoryService matchesHistoryService) : Controller {
     private const string MatchScoreViewName = "MatchScore";
 
-    public IActionResult GetMatchScore([ValidGuid] Guid uuid)
-    {
+    private static string MatchNotFoundMessage(Guid uuid) => string.Format($"Match '{uuid}' was not found");
+
+    public IActionResult GetMatchScore([ValidGuid] Guid uuid) {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var matchScore = _ongoingMatchesService.Get(uuid);
+        var matchScore = ongoingMatchesService.Get(uuid);
         if (matchScore is null)
             return NotFound(new { message = MatchNotFoundMessage(uuid) });
 
-        return View(MatchScoreViewName, new MatchScoreViewModel
-        {
-            MatchScore = matchScore,
-            Uuid = uuid
-        });
+        return View(MatchScoreViewName, new MatchScoreViewModel(matchScore, uuid));
     }
 
     [HttpPost]
-    public async Task<IActionResult> UpdateMatchScore(UpdateMatchScoreRequest request)
-    {
+    public async Task<IActionResult> UpdateMatchScore(UpdateMatchScoreRequest request) {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
             
-        var matchScore = _ongoingMatchesService.Get(request.Uuid);
+        var matchScore = ongoingMatchesService.Get(request.Uuid);
         if (matchScore is null)
             return NotFound(new { message = MatchNotFoundMessage(request.Uuid) });
         
@@ -50,15 +40,10 @@ public class MatchScoreController(
         if (!context.IsValid)
             return BadRequest(new { message = "Winner ID must be equal to one of player's ID" });
 
-        _matchScoreCalculationService.UpdateMatchScore(context);
+        matchScoreCalculationService.UpdateMatchScore(context);
         if (matchScore.IsMatchFinished)
-            await _matchesHistoryService.AddToHistory(context);
+            await matchesHistoryService.AddToHistory(context);
 
-        return View(MatchScoreViewName, new MatchScoreViewModel
-        {
-            MatchScore = matchScore,
-            Uuid = request.Uuid,
-            WinnerId = request.WinnerId
-        });
+        return View(MatchScoreViewName, new MatchScoreViewModel(matchScore, request.Uuid, request.WinnerId));
     }
 }
