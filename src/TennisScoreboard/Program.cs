@@ -26,9 +26,12 @@ using (var scope = app.Services.CreateScope()) {
     await initializer.InitializeAsync();
 }
 
+app.UseExceptionHandler("/error");
+app.UseHsts();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.MapControllerRoute("default", "{controller=Home}/{action=Index}");
+app.MapDefaultControllerRoute();
 
 app.Run();

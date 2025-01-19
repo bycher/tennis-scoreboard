@@ -14,18 +14,15 @@ public class TennisMatchesContext : DbContext {
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         modelBuilder.Entity<Match>()
-                    .HasOne(m => m.FirstPlayer)
-                    .WithMany()
+                    .HasOne(m => m.FirstPlayer).WithMany()
                     .HasForeignKey(m => m.FirstPlayerId);
         
         modelBuilder.Entity<Match>()
-                    .HasOne(m => m.SecondPlayer)
-                    .WithMany()
+                    .HasOne(m => m.SecondPlayer).WithMany()
                     .HasForeignKey(m => m.SecondPlayerId);
         
         modelBuilder.Entity<Match>()
-                    .HasOne(m => m.Winner)
-                    .WithMany()
+                    .HasOne(m => m.Winner).WithMany()
                     .HasForeignKey(m => m.WinnerId);
     }
 }

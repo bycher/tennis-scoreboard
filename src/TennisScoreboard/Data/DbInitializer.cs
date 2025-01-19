@@ -29,8 +29,9 @@ public class DbInitializer(
         await InitializeMatches(players);
     }
 
-    private async Task<IEnumerable<Player>> InitializePlayers() =>
-        await Task.WhenAll(_playerNames.Select(async pn => await playersService.AddPlayer(pn)));
+    private async Task<IEnumerable<Player>> InitializePlayers() => await Task.WhenAll(
+        _playerNames.Select(async pn => await playersService.AddPlayer(pn))
+    );
 
     private async Task InitializeMatches(IEnumerable<Player> players) {
         var playersList = players.ToList();

@@ -1,0 +1,12 @@
+@model ErrorViewModel
+
+<div class="error-container">
+    <h1 class="error-title">Oops! Something went wrong.</h1>
+
+    <div class="error-details">
+        <p class="error-message"><strong>Message: </strong>@Model.Message</p>
+        @if (!string.IsNullOrEmpty(Model.Details)) {
+            <p><strong>Details: </strong>@Model.Details</p>
+        }
+    </div>
+</div>

@@ -17,7 +17,8 @@ public class PlayerScoreViewModel(MatchScoreDto matchScore, Player player) {
 
     private T GetComponent<T>(string componentName, object?[]? parameters = null) {
         MatchScore.TryGetScoreComponent(componentName, Player.Id, out T? component, parameters);
-        return component ?? throw new InvalidOperationException(GetScoreComponentFailedMessage(componentName));
+        return component
+            ?? throw new InvalidOperationException(GetScoreComponentFailedMessage(componentName));
     }
 
     private static string GetScoreComponentFailedMessage(string componentName) =>
