@@ -1,0 +1,29 @@
+name: Deploy to remote server via ssh
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deployment job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0
+      - name: Build and Publish Application
+        run: dotnet publish -c Release -o ./publish
+      - name: Deploy to DigitalOcean
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Use the private SSH key stored in secrets
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+          scp -r ./publish/* root@{$SERVER_IP}:/var/www/tennis-scoreboard
+          ssh <user>@<your-droplet-ip> "sudo systemctl restart nginx"
+      
