@@ -15,18 +15,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0
+
       - name: Build and Publish Application
         run: dotnet publish -c Release
-      - name: Deploy to remote server
+
+      - name: Configure private key
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-          scp -r ./publish/* root@$SERVER_IP:/var/www/tennis-scoreboard
+
+      - name: Copy files
+        run: scp -r ./publish/* root@$SERVER_IP:/var/www/tennis-scoreboard
     
       - name: Restart service
         run: |
