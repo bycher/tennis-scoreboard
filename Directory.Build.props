@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <BaseOutputPath>$(SolutionDir)publish/</BaseOutputPath>
+  </PropertyGroup>
+</Project>
