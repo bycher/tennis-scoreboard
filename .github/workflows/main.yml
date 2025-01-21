@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0
@@ -31,7 +31,7 @@ jobs:
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
       - name: Copy files
-        run: scp -r ./publish/* root@$SERVER_IP:/var/www/tennis-scoreboard
+        run: scp -i ~/.ssh/id_rsa -r ./publish/* root@$SERVER_IP:/var/www/tennis-scoreboard
     
       - name: Restart service
         run: |
